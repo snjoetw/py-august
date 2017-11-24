@@ -7,6 +7,7 @@ def epoch_to_datetime(epoch):
 class ActivityType(Enum):
     DOORBELL_MOTION = "doorbell_motion"
     DOORBELL_DING = "doorbell_ding"
+    DOORBELL_VIEW = "doorbell_view"
 
 class Activity:
     def __init__(self, activity_type, data):
@@ -76,6 +77,28 @@ class DoorbellDingActivity(Activity):
     def __init__(self, data):
         super().__init__(ActivityType.DOORBELL_DING, data)
 
+        info = data.get("info", {})
+        self._activity_start_time = epoch_to_datetime(info.get("started"))
+        self._activity_end_time = epoch_to_datetime(info.get("ended"))
+        self._image_url = info.get("image")
+    
+    @property
+    def image_url(self):
+        return self._image_url
+    
+    @property
+    def activity_start_time(self):
+        return self._activity_start_time
+    
+    @property
+    def activity_end_time(self):
+        return self._activity_end_time
+
+
+class DoorbellViewActivity(Activity):
+    def __init__(self, data):
+        super().__init__(ActivityType.DOORBELL_VIEW, data)
+        
         info = data.get("info", {})
         self._activity_start_time = epoch_to_datetime(info.get("started"))
         self._activity_end_time = epoch_to_datetime(info.get("ended"))

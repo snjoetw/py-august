@@ -4,7 +4,7 @@ import logging
 import requests
 
 from august.doorbell import Doorbell
-from august.activity import DoorbellDingActivity, DoorbellMotionActivity
+from august.activity import DoorbellDingActivity, DoorbellMotionActivity, DoorbellViewActivity
 
 HEADER_ACCEPT_VERSION = "Accept-Version"
 HEADER_AUGUST_ACCESS_TOKEN = "x-august-access-token"
@@ -104,10 +104,14 @@ class Api:
         
         activities = []
         for activity_json in response.json():
-            if activity_json.get("action") == "doorbell_motion_detected":
-                activities.append(DoorbellMotionActivity(activity_json))
-            elif activity_json.get("action") == "doorbell_call_missed":
+            action = activity_json.get("action")
+            
+            if action in ["doorbell_call_missed", "doorbell_call_hangup"]:
                 activities.append(DoorbellDingActivity(activity_json))
+            elif action == "doorbell_motion_detected":
+                activities.append(DoorbellMotionActivity(activity_json))
+            elif action == "doorbell_call_initiated":
+                activities.append(DoorbellViewActivity(activity_json))
         
         return activities
 
