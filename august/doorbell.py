@@ -7,9 +7,10 @@ class Doorbell:
         self._house_id = data["HouseID"]
         recent_image = data.get("recentImage", {})
         self._image_url = recent_image.get("secure_url", None)
+        self._has_subscription = data.get("dvrSubscriptionSetupDone", False)
 
     @property
-    def id(self):
+    def device_id(self):
         return self._id
 
     @property
@@ -31,6 +32,10 @@ class Doorbell:
     @property
     def image_url(self):
         return self._image_url
+
+    @property
+    def has_subscription(self):
+        return self._has_subscription
 
     def __repr__(self):
         return "Doorbell(id={}, name={}, house_id={})".format(
