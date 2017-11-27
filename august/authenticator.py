@@ -88,14 +88,14 @@ class Authenticator:
 
         if (access_token_cache_file is not None and
                 os.path.exists(access_token_cache_file)):
-            with open(access_token_cache_file, 'r') as f:
+            with open(access_token_cache_file, 'r') as file:
                 try:
                     self._authentication = from_authentication_json(
-                        json.load(f))
+                        json.load(file))
                     return
-                except json.decoder.JSONDecodeError as e:
+                except json.decoder.JSONDecodeError as error:
                     _LOGGER.error("Unable to read cache file (%s): %s",
-                                  access_token_cache_file, e)
+                                  access_token_cache_file, error)
 
         self._authentication = Authentication(
             AuthenticationState.REQUIRES_AUTHENTICATION,
@@ -132,11 +132,10 @@ class Authenticator:
         return self._authentication
 
     def send_verification_code(self):
-        response = self._api.send_verification_code(
+        self._api.send_verification_code(
             self._authentication.access_token, self._login_method,
             self._username)
 
-        # TODO:
         return True
 
     def validate_verification_code(self, verification_code):
@@ -144,7 +143,7 @@ class Authenticator:
             return ValidationResult.INVALID_VERIFICATION_CODE
 
         try:
-            response = self._api.validate_verification_code(
+            self._api.validate_verification_code(
                 self._authentication.access_token, self._login_method,
                 self._username, verification_code)
         except requests.exceptions.RequestException:
@@ -154,5 +153,5 @@ class Authenticator:
 
     def _cache_authentication(self, authentication):
         if self._access_token_cache_file is not None:
-            with open(self._access_token_cache_file, "w") as f:
-                f.write(to_authentication_json(authentication))
+            with open(self._access_token_cache_file, "w") as file:
+                file.write(to_authentication_json(authentication))

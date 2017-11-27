@@ -40,6 +40,21 @@ API_GET_LOCK_STATUS_URL = API_BASE_URL + "/locks/{lock_id}/status"
 _LOGGER = logging.getLogger(__name__)
 
 
+def _api_headers(access_token=None):
+    headers = {
+        HEADER_ACCEPT_VERSION: HEADER_VALUE_ACCEPT_VERSION,
+        HEADER_AUGUST_API_KEY: HEADER_VALUE_API_KEY,
+        HEADER_KEASE_API_KEY: HEADER_VALUE_API_KEY,
+        HEADER_CONTENT_TYPE: HEADER_VALUE_CONTENT_TYPE,
+        HEADER_USER_AGENT: HEADER_VALUE_USER_AGENT,
+    }
+
+    if access_token:
+        headers[HEADER_AUGUST_ACCESS_TOKEN] = access_token
+
+    return headers
+
+
 class Api:
     def __init__(self, timeout=10):
         self._timeout = timeout
@@ -154,7 +169,7 @@ class Api:
         payload = kwargs.get("params") or kwargs.get("json")
 
         if "headers" not in kwargs:
-            kwargs["headers"] = self._api_headers(access_token=access_token)
+            kwargs["headers"] = _api_headers(access_token=access_token)
 
         _LOGGER.debug("About to call %s with header=%s and payload=%s", url,
                       kwargs["headers"], payload)
@@ -167,17 +182,3 @@ class Api:
 
         response.raise_for_status()
         return response
-
-    def _api_headers(self, access_token=None):
-        headers = {
-            HEADER_ACCEPT_VERSION: HEADER_VALUE_ACCEPT_VERSION,
-            HEADER_AUGUST_API_KEY: HEADER_VALUE_API_KEY,
-            HEADER_KEASE_API_KEY: HEADER_VALUE_API_KEY,
-            HEADER_CONTENT_TYPE: HEADER_VALUE_CONTENT_TYPE,
-            HEADER_USER_AGENT: HEADER_VALUE_USER_AGENT,
-        }
-
-        if access_token:
-            headers[HEADER_AUGUST_ACCESS_TOKEN] = access_token
-
-        return headers
