@@ -13,7 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 
 def to_authentication_json(authentication):
     if authentication is None:
-        return json.dump({})
+        return json.dumps({})
 
     return json.dumps({
         "install_id": authentication.install_id,
