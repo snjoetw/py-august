@@ -19,22 +19,23 @@ HEADER_VALUE_CONTENT_TYPE = "application/json"
 HEADER_VALUE_USER_AGENT = "August/Luna-3.2.2"
 HEADER_VALUE_ACCEPT_VERSION = "0.0.1"
 
-API_GET_SESSION_URL = "https://api-production.august.com/session"
+API_BASE_URL = "https://api-production.august.com"
+API_GET_SESSION_URL = API_BASE_URL + "/session"
 API_SEND_VERIFICATION_CODE_URLS = {
-    "phone": "https://api-production.august.com/validation/phone",
-    "email": "https://api-production.august.com/validation/email",
+    "phone": API_BASE_URL + "/validation/phone",
+    "email": API_BASE_URL + "/validation/email",
 }
 API_VALIDATE_VERIFICATION_CODE_URLS = {
-    "phone": "https://api-production.august.com/validate/phone",
-    "email": "https://api-production.august.com/validate/email",
+    "phone": API_BASE_URL + "/validate/phone",
+    "email": API_BASE_URL + "/validate/email",
 }
-API_GET_HOUSE_ACTIVITIES_URL = "https://api-production.august.com/houses/{house_id}/activities"
-API_GET_DOORBELLS_URL = "https://api-production.august.com/users/doorbells/mine"
-API_GET_DOORBELL_URL = "https://api-production.august.com/doorbells/{doorbell_id}"
-API_WAKEUP_DOORBELL_URL = "https://api-production.august.com/doorbells/{doorbell_id}/wakeup"
-API_GET_LOCKS_URL = "https://api-production.august.com/users/locks/mine"
-API_GET_LOCK_URL = "https://api-production.august.com/locks/{lock_id}"
-API_GET_LOCK_STATUS_URL = "https://api-production.august.com/locks/{lock_id}/status"
+API_GET_HOUSE_ACTIVITIES_URL = API_BASE_URL + "/houses/{house_id}/activities"
+API_GET_DOORBELLS_URL = API_BASE_URL + "/users/doorbells/mine"
+API_GET_DOORBELL_URL = API_BASE_URL + "/doorbells/{doorbell_id}"
+API_WAKEUP_DOORBELL_URL = API_BASE_URL + "/doorbells/{doorbell_id}/wakeup"
+API_GET_LOCKS_URL = API_BASE_URL + "/users/locks/mine"
+API_GET_LOCK_URL = API_BASE_URL + "/locks/{lock_id}"
+API_GET_LOCK_STATUS_URL = API_BASE_URL + "/locks/{lock_id}/status"
 
 _LOGGER = logging.getLogger(__name__)
 
