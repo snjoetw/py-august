@@ -66,16 +66,19 @@ class Authentication:
 
 
 class AuthenticationState(Enum):
-    NONE = "none"
+    REQUIRES_AUTHENTICATION = "requires_authentication"
     REQUIRES_VALIDATION = "requires_validation"
-    AWAITING_VALIDATION = "awaiting_validation"
     AUTHENTICATED = "authenticated"
     BAD_PASSWORD = "bad_password"
+
+
+class ValidationResult(Enum):
+    VALIDATED = "validated"
     INVALID_VERIFICATION_CODE = "invalid_verification_code"
 
 
 class Authenticator:
-    def __init__(self, api, login_method, username, password,
+    def __init__(self, api, login_method, username, password, install_id=None,
                  access_token_cache_file=None):
         self._api = api
         self._login_method = login_method
@@ -86,34 +89,22 @@ class Authenticator:
         if (access_token_cache_file is not None and
                 os.path.exists(access_token_cache_file)):
             with open(access_token_cache_file, 'r') as f:
-                self._authentication = from_authentication_json(json.load(f))
-        else:
-            self._authentication = Authentication(AuthenticationState.NONE)
+                try:
+                    self._authentication = from_authentication_json(
+                        json.load(f))
+                    return
+                except json.decoder.JSONDecodeError as e:
+                    _LOGGER.error("Unable to read cache file (%s): %s",
+                                  access_token_cache_file, e)
 
-    def _update_authentication_state(self, state):
-        self._authentication.state = state
-        self._cache()
+        self._authentication = Authentication(
+            AuthenticationState.REQUIRES_AUTHENTICATION,
+            install_id=install_id)
 
-    def _cache(self):
-        if self._access_token_cache_file is not None:
-            with open(self._access_token_cache_file, "w") as f:
-                f.write(to_authentication_json(self._authentication))
+    def authenticate(self):
+        if self._authentication.state == AuthenticationState.AUTHENTICATED:
+            return self._authentication
 
-    def authenticate(self, verification_code=None):
-        state = self._authentication.state
-
-        if state in [AuthenticationState.NONE,
-                     AuthenticationState.BAD_PASSWORD]:
-            self._get_session()
-        elif state in [AuthenticationState.REQUIRES_VALIDATION,
-                       AuthenticationState.INVALID_VERIFICATION_CODE]:
-            self._send_verification_code()
-        elif AuthenticationState.AWAITING_VALIDATION == state:
-            self._validate_verification_code(verification_code)
-
-        return self._authentication
-
-    def _get_session(self):
         identifier = self._login_method + ":" + self._username
         install_id = self._authentication.install_id
         response = self._api.get_session(install_id, identifier,
@@ -124,36 +115,44 @@ class Authenticator:
         access_token_expires = data["expiresAt"]
         v_password = data["vPassword"]
         v_install_id = data["vInstallId"]
-        state = AuthenticationState.NONE
 
-        if v_password == False:
+        if not v_password:
             state = AuthenticationState.BAD_PASSWORD
-        elif v_install_id == False:
+        elif not v_install_id:
             state = AuthenticationState.REQUIRES_VALIDATION
         else:
             state = AuthenticationState.AUTHENTICATED
 
         self._authentication = Authentication(state, install_id, access_token,
                                               access_token_expires)
-        self._cache()
 
-    def _send_verification_code(self):
+        if state == AuthenticationState.AUTHENTICATED:
+            self._cache_authentication(self._authentication)
+
+        return self._authentication
+
+    def send_verification_code(self):
         response = self._api.send_verification_code(
             self._authentication.access_token, self._login_method,
             self._username)
-        self._update_authentication_state(
-            AuthenticationState.AWAITING_VALIDATION)
 
-    def _validate_verification_code(self, verification_code):
+        # TODO:
+        return True
+
+    def validate_verification_code(self, verification_code):
         if not verification_code:
-            self._update_authentication_state(
-                AuthenticationState.INVALID_VERIFICATION_CODE)
+            return ValidationResult.INVALID_VERIFICATION_CODE
 
         try:
             response = self._api.validate_verification_code(
                 self._authentication.access_token, self._login_method,
                 self._username, verification_code)
-            self._get_session()
         except requests.exceptions.RequestException:
-            self._update_authentication_state(
-                AuthenticationState.INVALID_VERIFICATION_CODE)
+            return ValidationResult.INVALID_VERIFICATION_CODE
+
+        return ValidationResult.VALIDATED
+
+    def _cache_authentication(self, authentication):
+        if self._access_token_cache_file is not None:
+            with open(self._access_token_cache_file, "w") as f:
+                f.write(to_authentication_json(authentication))
