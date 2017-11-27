@@ -3,8 +3,9 @@ import logging
 
 import requests
 
+from august.activity import DoorbellDingActivity, DoorbellMotionActivity, \
+    DoorbellViewActivity
 from august.doorbell import Doorbell
-from august.activity import DoorbellDingActivity, DoorbellMotionActivity, DoorbellViewActivity
 
 HEADER_ACCEPT_VERSION = "Accept-Version"
 HEADER_AUGUST_ACCESS_TOKEN = "x-august-access-token"
@@ -27,12 +28,13 @@ API_VALIDATE_VERIFICATION_CODE_URLS = {
     "phone": "https://api-production.august.com/validate/phone",
     "email": "https://api-production.august.com/validate/email",
 }
-API_GET_DOORBELLS_URL = "https://api-production.august.com/users/doorbells/mine"
-API_GET_LOCKS_URL = "https://api-production.august.com/users/locks/mine"
 API_GET_HOUSE_ACTIVITIES_URL = "https://api-production.august.com/houses/{house_id}/activities"
+API_GET_DOORBELLS_URL = "https://api-production.august.com/users/doorbells/mine"
+API_GET_DOORBELL_URL = "https://api-production.august.com/doorbells/{doorbell_id}"
+API_WAKEUP_DOORBELL_URL = "https://api-production.august.com/doorbells/{doorbell_id}/wakeup"
+API_GET_LOCKS_URL = "https://api-production.august.com/users/locks/mine"
 API_GET_LOCK_URL = "https://api-production.august.com/locks/{lock_id}"
 API_GET_LOCK_STATUS_URL = "https://api-production.august.com/locks/{lock_id}/status"
-API_WAKEUP_DOORBELL_URL = "https://api-production.august.com/doorbells/{doorbell_id}/wakeup"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -85,6 +87,14 @@ class Api:
 
         return [Doorbell(data) for data in json.values()]
 
+    def get_doorbell(self, access_token, doorbell_id):
+        response = self._call_api(
+            "get",
+            API_GET_DOORBELL_URL.format(doorbell_id=doorbell_id),
+            access_token=access_token)
+
+        return response.json()
+
     def get_locks(self, access_token):
         response = self._call_api(
             "get",
@@ -101,21 +111,21 @@ class Api:
             params={
                 "limit": limit,
             })
-        
+
         activities = []
         for activity_json in response.json():
             action = activity_json.get("action")
-            
+
             if action in ["doorbell_call_missed", "doorbell_call_hangup"]:
                 activities.append(DoorbellDingActivity(activity_json))
             elif action == "doorbell_motion_detected":
                 activities.append(DoorbellMotionActivity(activity_json))
             elif action == "doorbell_call_initiated":
                 activities.append(DoorbellViewActivity(activity_json))
-        
+
         return activities
 
-    def get_lock(self, lock_id, access_token):
+    def get_lock(self, access_token, lock_id):
         response = self._call_api(
             "get",
             API_GET_LOCK_URL.format(lock_id=lock_id),
@@ -123,7 +133,7 @@ class Api:
 
         return response.json()
 
-    def get_lock_status(self, lock_id, access_token):
+    def get_lock_status(self, access_token, lock_id):
         response = self._call_api(
             "get",
             API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
@@ -139,15 +149,17 @@ class Api:
 
         return True
 
-    def _call_api(self, method, url, access_token=None, params=None, **kwargs):
+    def _call_api(self, method, url, access_token=None, **kwargs):
+        payload = kwargs.get("params") or kwargs.get("json")
+
         if "headers" not in kwargs:
             kwargs["headers"] = self._api_headers(access_token=access_token)
 
-        _LOGGER.debug("About to call %s with header=%s and params=%s", url,
-                      kwargs["headers"], params)
+        _LOGGER.debug("About to call %s with header=%s and payload=%s", url,
+                      kwargs["headers"], payload)
 
-        response = requests.request(method, url, params=params,
-                                    timeout=self._timeout, **kwargs)
+        response = requests.request(method, url, timeout=self._timeout,
+                                    **kwargs)
 
         _LOGGER.debug("Received API response: %s, %s", response.status_code,
                       response.content)
