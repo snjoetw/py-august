@@ -1,0 +1,70 @@
+{
+  "K98GiDT45GUL": {
+    "_id": "epoZ87XSPqxlFdsaYyJiRRVR",
+    "doorbellID": "K98GiDT45GUL",
+    "serialNumber": "tBXZR0Z35E",
+    "appID": "august-iphone",
+    "installUserID": "c3b3a94f-473z-61a3-a8d1-a6e99482787a",
+    "name": "Front Door",
+    "installDate": "2016-11-26T22:27:11.176Z",
+    "currentDoorbellAppVersion": "1.1.0-RC152+201710181449",
+    "pubsubChannel": "7c7a6672-59c8-49f4-8faf-dcd98705c159",
+    "settings": {
+      "motion_notifications": true,
+      "notify_when_offline": true,
+      "buttonpush_notifications": true
+    },
+    "createdAt": "2016-11-26T22:27:11.176Z",
+    "updatedAt": "2017-11-23T00:42:19.470Z",
+    "status": "doorbell_call_status_online",
+    "telemetry": {
+      "date": "2017-11-23 12:42:17",
+      "BSSID": "98:44:55:66:77:88",
+      "SSID": "foobar",
+      "wifi_freq": 5711,
+      "ip_addr": "10.1.1.116",
+      "link_quality": 58,
+      "signal_level": -52,
+      "uptime": "52910.91 45197.84",
+      "load_average": "0.19 0.21 0.23 2/149 27464",
+      "temperature": 36.5,
+      "steady_ac_in": 22.113834,
+      "battery": 4.057726,
+      "ac_in": 24.305649,
+      "doorbell_low_battery": false,
+      "updated_at": "2017-11-23T00:42:19.470Z"
+    },
+    "doorbellServerURL": "https://doorbells.august.com",
+    "caps": [
+      "reconnect"
+    ],
+    "recentImage": {
+      "public_id": "GjtkxMwBKde5krHDrd7K",
+      "version": 1511381838,
+      "signature": "aa7a582ed85224fd330dd8c011d012f9c1a44f6a",
+      "width": 480,
+      "height": 640,
+      "format": "jpg",
+      "resource_type": "image",
+      "created_at": "2017-11-22T20:17:19Z",
+      "tags": [],
+      "bytes": 41215,
+      "type": "upload",
+      "etag": "f35fdda689067355d4e322e1cc209b11",
+      "placeholder": false,
+      "url": "http://res.cloudinary.com/august-com/image/upload/v1111381888/HjtkxMwBaade5bbbbrd7K.jpg",
+      "secure_url": "https://image.com/vmk16naaaa7ibuey7sar.jpg",
+      "original_filename": "file"
+    },
+    "dvrSubscriptionSetupDone": true,
+    "HouseID": "3dd2accaea08"
+  },
+  "1KDAbJH89XYZ": {
+    "doorbellID": "1KDAbJH89XYZ",
+    "serialNumber": "aaaaR08888",
+    "status": "doorbell_call_status_offline",
+    "name": "Back Door",
+    "dvrSubscriptionSetupDone": false,
+    "HouseID": "3dd2accadddd"
+  }
+}
