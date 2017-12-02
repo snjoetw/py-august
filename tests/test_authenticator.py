@@ -1,4 +1,3 @@
-"""The tests for the Canary sensor platform."""
 import unittest
 from unittest.mock import patch, Mock
 
