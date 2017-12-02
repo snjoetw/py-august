@@ -1,4 +1,3 @@
-# https://github.com/mlamoure/Indigo-August-Home/blob/master/August%20Home.indigoPlugin/Contents/Server%20Plugin/plugin.py
 import logging
 
 import requests
@@ -6,6 +5,7 @@ import requests
 from august.activity import DoorbellDingActivity, DoorbellMotionActivity, \
     DoorbellViewActivity
 from august.doorbell import Doorbell
+from august.lock import Lock, LockStatus
 
 HEADER_ACCEPT_VERSION = "Accept-Version"
 HEADER_AUGUST_ACCESS_TOKEN = "x-august-access-token"
@@ -33,9 +33,13 @@ API_GET_HOUSE_ACTIVITIES_URL = API_BASE_URL + "/houses/{house_id}/activities"
 API_GET_DOORBELLS_URL = API_BASE_URL + "/users/doorbells/mine"
 API_GET_DOORBELL_URL = API_BASE_URL + "/doorbells/{doorbell_id}"
 API_WAKEUP_DOORBELL_URL = API_BASE_URL + "/doorbells/{doorbell_id}/wakeup"
+API_GET_HOUSES_URL = API_BASE_URL + "/users/houses/mine"
+API_GET_HOUSE_URL = API_BASE_URL + "/houses/{house_id}"
 API_GET_LOCKS_URL = API_BASE_URL + "/users/locks/mine"
 API_GET_LOCK_URL = API_BASE_URL + "/locks/{lock_id}"
 API_GET_LOCK_STATUS_URL = API_BASE_URL + "/locks/{lock_id}/status"
+API_LOCK_URL = API_BASE_URL + "/remoteoperate/{lock_id}/lock"
+API_UNLOCK_URL = API_BASE_URL + "/remoteoperate/{lock_id}/unlock"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -101,7 +105,7 @@ class Api:
             API_GET_DOORBELLS_URL,
             access_token=access_token).json()
 
-        return [Doorbell(data) for data in json.values()]
+        return [Doorbell(device_id, data) for device_id, data in json.items()]
 
     def get_doorbell(self, access_token, doorbell_id):
         response = self._call_api(
@@ -111,10 +115,26 @@ class Api:
 
         return response.json()
 
-    def get_locks(self, access_token):
+    def wakeup_doorbell(self, access_token, doorbell_id):
+        self._call_api(
+            "put",
+            API_WAKEUP_DOORBELL_URL.format(doorbell_id=doorbell_id),
+            access_token=access_token)
+
+        return True
+
+    def get_houses(self, access_token):
         response = self._call_api(
             "get",
-            API_GET_LOCKS_URL,
+            API_GET_HOUSES_URL,
+            access_token=access_token)
+
+        return response.json()
+
+    def get_house(self, access_token, house_id):
+        response = self._call_api(
+            "get",
+            API_GET_HOUSE_URL.format(house_id=house_id),
             access_token=access_token)
 
         return response.json()
@@ -141,6 +161,14 @@ class Api:
 
         return activities
 
+    def get_locks(self, access_token):
+        json = self._call_api(
+            "get",
+            API_GET_LOCKS_URL,
+            access_token=access_token).json()
+
+        return [Lock(device_id, data) for device_id, data in json.items()]
+
     def get_lock(self, access_token, lock_id):
         response = self._call_api(
             "get",
@@ -150,20 +178,28 @@ class Api:
         return response.json()
 
     def get_lock_status(self, access_token, lock_id):
-        response = self._call_api(
+        json = self._call_api(
             "get",
             API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
-            access_token=access_token)
+            access_token=access_token).json()
 
-        return response.json()
+        return LockStatus(json["status"])
 
-    def wakeup_doorbell(self, access_token, doorbell_id):
-        self._call_api(
+    def lock(self, access_token, lock_id):
+        json = self._call_api(
             "put",
-            API_WAKEUP_DOORBELL_URL.format(doorbell_id=doorbell_id),
-            access_token=access_token)
+            API_LOCK_URL.format(lock_id=lock_id),
+            access_token=access_token).json()
 
-        return True
+        return LockStatus(json["status"])
+
+    def unlock(self, access_token, lock_id):
+        json = self._call_api(
+            "put",
+            API_UNLOCK_URL.format(lock_id=lock_id),
+            access_token=access_token).json()
+
+        return LockStatus(json["status"])
 
     def _call_api(self, method, url, access_token=None, **kwargs):
         payload = kwargs.get("params") or kwargs.get("json")
