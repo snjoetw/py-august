@@ -4,7 +4,8 @@ import unittest
 import requests_mock
 
 from august.api import API_GET_DOORBELLS_URL, Api, API_GET_LOCKS_URL, \
-    API_GET_LOCK_STATUS_URL, API_LOCK_URL, API_UNLOCK_URL
+    API_GET_LOCK_STATUS_URL, API_LOCK_URL, API_UNLOCK_URL, API_GET_LOCK_URL, \
+    API_GET_DOORBELL_URL
 from august.lock import LockStatus
 
 ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9"
@@ -50,6 +51,27 @@ class TestApi(unittest.TestCase):
         self.assertEqual("3dd2accadddd", second.house_id)
 
     @requests_mock.Mocker()
+    def test_get_doorbell(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_DOORBELL_URL.format(doorbell_id="K98GiDT45GUL"),
+            text=load_fixture("get_doorbell.json"))
+
+        api = Api()
+        doorbell = api.get_doorbell(ACCESS_TOKEN, "K98GiDT45GUL")
+
+        self.assertEqual("K98GiDT45GUL", doorbell.device_id)
+        self.assertEqual("Front Door", doorbell.device_name)
+        self.assertEqual("3dd2accaea08", doorbell.house_id)
+        self.assertEqual("tBXZR0Z35E", doorbell.serial_number)
+        self.assertEqual("2.3.0-RC153+201711151527", doorbell.firmware_version)
+        self.assertEqual("doorbell_call_status_online", doorbell.status)
+        self.assertEqual(True, doorbell.is_online)
+        self.assertEqual(True, doorbell.has_subscription)
+        self.assertEqual("https://image.com/vmk16naaaa7ibuey7sar.jpg",
+                         doorbell.image_url)
+
+    @requests_mock.Mocker()
     def test_get_locks(self, mock):
         mock.register_uri(
             "get",
@@ -65,6 +87,24 @@ class TestApi(unittest.TestCase):
         self.assertEqual("A6697750D607098BAE8D6BAA11EF8063", first.device_id)
         self.assertEqual("Front Door Lock", first.device_name)
         self.assertEqual("000000000000", first.house_id)
+
+    @requests_mock.Mocker()
+    def test_get_lock(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_LOCK_URL.format(
+                lock_id="A6697750D607098BAE8D6BAA11EF8063"),
+            text=load_fixture("get_lock.json"))
+
+        api = Api()
+        lock = api.get_lock(ACCESS_TOKEN, "A6697750D607098BAE8D6BAA11EF8063")
+
+        self.assertEqual("A6697750D607098BAE8D6BAA11EF8063", lock.device_id)
+        self.assertEqual("Front Door Lock", lock.device_name)
+        self.assertEqual("000000000000", lock.house_id)
+        self.assertEqual("X2FSW05DGA", lock.serial_number)
+        self.assertEqual("109717e9-3.0.44-3.0.30", lock.firmware_version)
+        self.assertEqual(88, lock.battery_level)
 
     @requests_mock.Mocker()
     def test_get_lock_status_with_locked_response(self, mock):
@@ -98,12 +138,12 @@ class TestApi(unittest.TestCase):
         mock.register_uri(
             "put",
             API_LOCK_URL.format(lock_id=lock_id),
-            text="{\"status\": \"kAugLockState_Locked\"}")
+            text="{\"status\":\"locked\",\"dateTime\":\"2017-12-10T07:43:39.056Z\",\"isLockStatusChanged\":false,\"valid\":true}")
 
         api = Api()
         status = api.lock(ACCESS_TOKEN, lock_id)
 
-        self.assertEqual(LockStatus.LOCKED, status)
+        self.assertEqual(LockStatus.LOCKED_ALIAS, status)
 
     @requests_mock.Mocker()
     def test_unlock(self, mock):

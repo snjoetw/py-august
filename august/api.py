@@ -4,8 +4,8 @@ import requests
 
 from august.activity import DoorbellDingActivity, DoorbellMotionActivity, \
     DoorbellViewActivity
-from august.doorbell import Doorbell
-from august.lock import Lock, LockStatus
+from august.doorbell import Doorbell, DoorbellDetail
+from august.lock import Lock, LockStatus, LockDetail
 
 HEADER_ACCEPT_VERSION = "Accept-Version"
 HEADER_AUGUST_ACCESS_TOKEN = "x-august-access-token"
@@ -60,8 +60,9 @@ def _api_headers(access_token=None):
 
 
 class Api:
-    def __init__(self, timeout=10):
+    def __init__(self, timeout=10, command_timeout=60):
         self._timeout = timeout
+        self._command_timeout = command_timeout
 
     def get_session(self, install_id, identifier, password):
         response = self._call_api(
@@ -113,7 +114,7 @@ class Api:
             API_GET_DOORBELL_URL.format(doorbell_id=doorbell_id),
             access_token=access_token)
 
-        return response.json()
+        return DoorbellDetail(response.json())
 
     def wakeup_doorbell(self, access_token, doorbell_id):
         self._call_api(
@@ -175,7 +176,7 @@ class Api:
             API_GET_LOCK_URL.format(lock_id=lock_id),
             access_token=access_token)
 
-        return response.json()
+        return LockDetail(response.json())
 
     def get_lock_status(self, access_token, lock_id):
         json = self._call_api(
@@ -189,7 +190,8 @@ class Api:
         json = self._call_api(
             "put",
             API_LOCK_URL.format(lock_id=lock_id),
-            access_token=access_token).json()
+            access_token=access_token,
+            timeout=self._command_timeout).json()
 
         return LockStatus(json["status"])
 
@@ -197,7 +199,8 @@ class Api:
         json = self._call_api(
             "put",
             API_UNLOCK_URL.format(lock_id=lock_id),
-            access_token=access_token).json()
+            access_token=access_token,
+            timeout=self._command_timeout).json()
 
         return LockStatus(json["status"])
 
@@ -207,11 +210,13 @@ class Api:
         if "headers" not in kwargs:
             kwargs["headers"] = _api_headers(access_token=access_token)
 
+        if "timeout" not in kwargs:
+            kwargs["timeout"] = self._timeout
+
         _LOGGER.debug("About to call %s with header=%s and payload=%s", url,
                       kwargs["headers"], payload)
 
-        response = requests.request(method, url, timeout=self._timeout,
-                                    **kwargs)
+        response = requests.request(method, url, **kwargs)
 
         _LOGGER.debug("Received API response: %s, %s", response.status_code,
                       response.content)
