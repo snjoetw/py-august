@@ -152,7 +152,10 @@ class TestApi(unittest.TestCase):
         mock.register_uri(
             "put",
             API_LOCK_URL.format(lock_id=lock_id),
-            text="{\"status\":\"locked\",\"dateTime\":\"2017-12-10T07:43:39.056Z\",\"isLockStatusChanged\":false,\"valid\":true}")
+            text="{\"status\":\"locked\","
+                 "\"dateTime\":\"2017-12-10T07:43:39.056Z\","
+                 "\"isLockStatusChanged\":false,"
+                 "\"valid\":true}")
 
         api = Api()
         status = api.lock(ACCESS_TOKEN, lock_id)
