@@ -35,7 +35,6 @@ class LockDetail(DeviceDetail):
 
 
 class LockStatus(Enum):
-    LOCKED = "kAugLockState_Locked"
-    UNLOCKED = "kAugLockState_Unlocked"
-    LOCKED_ALIAS = "locked"
-    UNLOCKED_ALIAS = "unlocked"
+    LOCKED = "locked"
+    UNLOCKED = "unlocked"
+    UNKNOWN = "unknown"

@@ -59,6 +59,18 @@ def _api_headers(access_token=None):
     return headers
 
 
+LOCKED_STATUS = ("locked", "kAugLockState_Locked")
+UNLOCKED_STATUS = ("unlocked", "kAugLockState_Unlocked")
+
+
+def _determine_lock_status(status):
+    if status in LOCKED_STATUS:
+        return LockStatus.LOCKED
+    elif status in UNLOCKED_STATUS:
+        return LockStatus.UNLOCKED
+    return LockStatus.UNKNOWN
+
+
 class Api:
     def __init__(self, timeout=10, command_timeout=60):
         self._timeout = timeout
@@ -186,7 +198,7 @@ class Api:
             API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
             access_token=access_token).json()
 
-        return LockStatus(json["status"])
+        return _determine_lock_status(json["status"])
 
     def lock(self, access_token, lock_id):
         json = self._call_api(
@@ -195,7 +207,7 @@ class Api:
             access_token=access_token,
             timeout=self._command_timeout).json()
 
-        return LockStatus(json["status"])
+        return _determine_lock_status(json["status"])
 
     def unlock(self, access_token, lock_id):
         json = self._call_api(
@@ -204,7 +216,7 @@ class Api:
             access_token=access_token,
             timeout=self._command_timeout).json()
 
-        return LockStatus(json["status"])
+        return _determine_lock_status(json["status"])
 
     def _call_api(self, method, url, access_token=None, **kwargs):
         payload = kwargs.get("params") or kwargs.get("json")

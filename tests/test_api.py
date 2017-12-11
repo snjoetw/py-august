@@ -134,6 +134,19 @@ class TestApi(unittest.TestCase):
         self.assertEqual(LockStatus.UNLOCKED, status)
 
     @requests_mock.Mocker()
+    def test_get_lock_status_with_unknown_status_response(self, mock):
+        lock_id = 1234
+        mock.register_uri(
+            "get",
+            API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
+            text="{\"status\": \"not_advertising\"}")
+
+        api = Api()
+        status = api.get_lock_status(ACCESS_TOKEN, lock_id)
+
+        self.assertEqual(LockStatus.UNKNOWN, status)
+
+    @requests_mock.Mocker()
     def test_lock(self, mock):
         lock_id = 1234
         mock.register_uri(
@@ -144,7 +157,7 @@ class TestApi(unittest.TestCase):
         api = Api()
         status = api.lock(ACCESS_TOKEN, lock_id)
 
-        self.assertEqual(LockStatus.LOCKED_ALIAS, status)
+        self.assertEqual(LockStatus.LOCKED, status)
 
     @requests_mock.Mocker()
     def test_unlock(self, mock):
@@ -152,7 +165,7 @@ class TestApi(unittest.TestCase):
         mock.register_uri(
             "put",
             API_UNLOCK_URL.format(lock_id=lock_id),
-            text="{\"status\": \"kAugLockState_Unlocked\"}")
+            text="{\"status\": \"unlocked\"}")
 
         api = Api()
         status = api.unlock(ACCESS_TOKEN, lock_id)
