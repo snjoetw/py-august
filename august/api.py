@@ -108,7 +108,7 @@ class Api:
 
         return [Doorbell(device_id, data) for device_id, data in json.items()]
 
-    def get_doorbell(self, access_token, doorbell_id):
+    def get_doorbell_detail(self, access_token, doorbell_id):
         response = self._call_api(
             "get",
             API_GET_DOORBELL_URL.format(doorbell_id=doorbell_id),
@@ -170,7 +170,7 @@ class Api:
 
         return [Lock(device_id, data) for device_id, data in json.items()]
 
-    def get_lock(self, access_token, lock_id):
+    def get_lock_detail(self, access_token, lock_id):
         response = self._call_api(
             "get",
             API_GET_LOCK_URL.format(lock_id=lock_id),

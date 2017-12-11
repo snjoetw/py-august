@@ -51,14 +51,14 @@ class TestApi(unittest.TestCase):
         self.assertEqual("3dd2accadddd", second.house_id)
 
     @requests_mock.Mocker()
-    def test_get_doorbell(self, mock):
+    def test_get_doorbell_detail(self, mock):
         mock.register_uri(
             "get",
             API_GET_DOORBELL_URL.format(doorbell_id="K98GiDT45GUL"),
             text=load_fixture("get_doorbell.json"))
 
         api = Api()
-        doorbell = api.get_doorbell(ACCESS_TOKEN, "K98GiDT45GUL")
+        doorbell = api.get_doorbell_detail(ACCESS_TOKEN, "K98GiDT45GUL")
 
         self.assertEqual("K98GiDT45GUL", doorbell.device_id)
         self.assertEqual("Front Door", doorbell.device_name)
@@ -89,7 +89,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual("000000000000", first.house_id)
 
     @requests_mock.Mocker()
-    def test_get_lock(self, mock):
+    def test_get_lock_detail(self, mock):
         mock.register_uri(
             "get",
             API_GET_LOCK_URL.format(
@@ -97,7 +97,8 @@ class TestApi(unittest.TestCase):
             text=load_fixture("get_lock.json"))
 
         api = Api()
-        lock = api.get_lock(ACCESS_TOKEN, "A6697750D607098BAE8D6BAA11EF8063")
+        lock = api.get_lock_detail(ACCESS_TOKEN,
+                                   "A6697750D607098BAE8D6BAA11EF8063")
 
         self.assertEqual("A6697750D607098BAE8D6BAA11EF8063", lock.device_id)
         self.assertEqual("Front Door Lock", lock.device_name)
