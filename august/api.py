@@ -3,7 +3,7 @@ import logging
 import requests
 
 from august.activity import DoorbellDingActivity, DoorbellMotionActivity, \
-    DoorbellViewActivity
+    DoorbellViewActivity, LockOperationActivity
 from august.doorbell import Doorbell, DoorbellDetail
 from august.lock import Lock, LockStatus, LockDetail
 
@@ -159,6 +159,8 @@ class Api:
                 activities.append(DoorbellMotionActivity(activity_json))
             elif action == "doorbell_call_initiated":
                 activities.append(DoorbellViewActivity(activity_json))
+            elif action in ["lock", "unlock"]:
+                activities.append(LockOperationActivity(activity_json))
 
         return activities
 

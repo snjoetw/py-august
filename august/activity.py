@@ -10,6 +10,7 @@ class ActivityType(Enum):
     DOORBELL_MOTION = "doorbell_motion"
     DOORBELL_DING = "doorbell_ding"
     DOORBELL_VIEW = "doorbell_view"
+    LOCK_OPERATION = "lock_operation"
 
 
 class Activity:
@@ -117,3 +118,18 @@ class DoorbellViewActivity(Activity):
     @property
     def activity_end_time(self):
         return self._activity_end_time
+
+
+class LockOperationActivity(Activity):
+    def __init__(self, data):
+        super().__init__(ActivityType.LOCK_OPERATION, data)
+
+        calling_user = data.get("callingUser", {})
+        self._operated_by = "{} {}".format(
+            calling_user.get("FirstName"),
+            calling_user.get("LastName"),
+        )
+
+    @property
+    def operated_by(self):
+        return self._operated_by
