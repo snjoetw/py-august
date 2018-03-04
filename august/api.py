@@ -184,6 +184,11 @@ class Api:
 
         return [Lock(device_id, data) for device_id, data in json.items()]
 
+    def get_operable_locks(self, access_token):
+        locks = self.get_locks(access_token)
+
+        return [lock for lock in locks if lock.is_operable]
+
     def get_lock_detail(self, access_token, lock_id):
         response = self._call_api(
             "get",

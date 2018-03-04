@@ -11,6 +11,12 @@ class Lock(Device):
             data["HouseID"],
         )
 
+        self._user_type = data["UserType"]
+
+    @property
+    def is_operable(self):
+        return self._user_type == "superuser"
+
     def __repr__(self):
         return "Lock(id={}, name={}, house_id={})".format(
             self.device_id,

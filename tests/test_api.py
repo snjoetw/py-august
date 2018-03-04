@@ -81,12 +81,37 @@ class TestApi(unittest.TestCase):
         api = Api()
         locks = api.get_locks(ACCESS_TOKEN)
 
+        self.assertEqual(2, len(locks))
+
+        first = locks[0]
+        self.assertEqual("A6697750D607098BAE8D6BAA11EF8063", first.device_id)
+        self.assertEqual("Front Door Lock", first.device_name)
+        self.assertEqual("000000000000", first.house_id)
+        self.assertEqual(True, first.is_operable)
+
+        second = locks[1]
+        self.assertEqual("A6697750D607098BAE8D6BAA11EF9999", second.device_id)
+        self.assertEqual("Back Door Lock", second.device_name)
+        self.assertEqual("000000000011", second.house_id)
+        self.assertEqual(False, second.is_operable)
+
+    @requests_mock.Mocker()
+    def test_get_operable_locks(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_LOCKS_URL,
+            text=load_fixture("get_locks.json"))
+
+        api = Api()
+        locks = api.get_operable_locks(ACCESS_TOKEN)
+
         self.assertEqual(1, len(locks))
 
         first = locks[0]
         self.assertEqual("A6697750D607098BAE8D6BAA11EF8063", first.device_id)
         self.assertEqual("Front Door Lock", first.device_name)
         self.assertEqual("000000000000", first.house_id)
+        self.assertEqual(True, first.is_operable)
 
     @requests_mock.Mocker()
     def test_get_lock_detail(self, mock):
