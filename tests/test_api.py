@@ -6,7 +6,7 @@ import requests_mock
 from august.api import API_GET_DOORBELLS_URL, Api, API_GET_LOCKS_URL, \
     API_GET_LOCK_STATUS_URL, API_LOCK_URL, API_UNLOCK_URL, API_GET_LOCK_URL, \
     API_GET_DOORBELL_URL
-from august.lock import LockStatus
+from august.lock import LockStatus, LockDoorStatus
 
 ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9"
 
