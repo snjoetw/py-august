@@ -5,7 +5,7 @@ import requests
 from august.activity import DoorbellDingActivity, DoorbellMotionActivity, \
     DoorbellViewActivity, LockOperationActivity
 from august.doorbell import Doorbell, DoorbellDetail
-from august.lock import Lock, LockStatus, LockDetail
+from august.lock import Lock, LockStatus, LockDoorStatus, LockDetail
 
 HEADER_ACCEPT_VERSION = "Accept-Version"
 HEADER_AUGUST_ACCESS_TOKEN = "x-august-access-token"
@@ -61,6 +61,8 @@ def _api_headers(access_token=None):
 
 LOCKED_STATUS = ("locked", "kAugLockState_Locked")
 UNLOCKED_STATUS = ("unlocked", "kAugLockState_Unlocked")
+CLOSED_STATUS = ("closed", "kAugLockDoorState_Closed")
+OPEN_STATUS = ("open", "kAugLockDoorState_Open")
 
 
 def _determine_lock_status(status):
@@ -70,6 +72,12 @@ def _determine_lock_status(status):
         return LockStatus.UNLOCKED
     return LockStatus.UNKNOWN
 
+def _determine_lock_door_status(status):
+    if status in CLOSED_STATUS:
+        return LockDoorStatus.CLOSED
+    elif status in OPEN_STATUS:
+        return LockDoorStatus.OPEN
+    return LockDoorStatus.UNKNOWN
 
 class Api:
     def __init__(self, timeout=10, command_timeout=60):
@@ -204,6 +212,14 @@ class Api:
             access_token=access_token).json()
 
         return _determine_lock_status(json["status"])
+
+    def get_lock_door_status(self, access_token, lock_id):
+        json = self._call_api(
+            "get",
+            API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
+            access_token=access_token).json()
+
+        return _determine_lock_door_status(json["doorState"])
 
     def lock(self, access_token, lock_id):
         json = self._call_api(
