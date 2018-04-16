@@ -13,6 +13,7 @@
   "SerialNumber": "X2FSW05DGA",
   "LockStatus": {
     "status": "locked",
+    "doorState": "closed",
     "dateTime": "2017-12-10T04:48:30.272Z",
     "isLockStatusChanged": true,
     "valid": true
