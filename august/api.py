@@ -72,12 +72,14 @@ def _determine_lock_status(status):
         return LockStatus.UNLOCKED
     return LockStatus.UNKNOWN
 
+
 def _determine_lock_door_status(status):
     if status in CLOSED_STATUS:
         return LockDoorStatus.CLOSED
     elif status in OPEN_STATUS:
         return LockDoorStatus.OPEN
     return LockDoorStatus.UNKNOWN
+
 
 class Api:
     def __init__(self, timeout=10, command_timeout=60):

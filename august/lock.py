@@ -45,6 +45,7 @@ class LockStatus(Enum):
     UNLOCKED = "unlocked"
     UNKNOWN = "unknown"
 
+
 class LockDoorStatus(Enum):
     CLOSED = "closed"
     OPEN = "open"
