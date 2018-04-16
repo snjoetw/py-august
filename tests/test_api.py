@@ -180,9 +180,9 @@ class TestApi(unittest.TestCase):
             text="{\"doorState\": \"kAugLockDoorState_Closed\"}")
 
         api = Api()
-        doorStatus = api.get_lock_door_status(ACCESS_TOKEN, lock_id)
+        door_status = api.get_lock_door_status(ACCESS_TOKEN, lock_id)
 
-        self.assertEqual(LockDoorStatus.CLOSED, doorStatus)
+        self.assertEqual(LockDoorStatus.CLOSED, door_status)
 
     @requests_mock.Mocker()
     def test_get_lock_door_status_with_open_response(self, mock):
@@ -193,9 +193,9 @@ class TestApi(unittest.TestCase):
             text="{\"doorState\": \"kAugLockDoorState_Open\"}")
 
         api = Api()
-        doorStatus = api.get_lock_door_status(ACCESS_TOKEN, lock_id)
+        door_status = api.get_lock_door_status(ACCESS_TOKEN, lock_id)
 
-        self.assertEqual(LockDoorStatus.OPEN, doorStatus)
+        self.assertEqual(LockDoorStatus.OPEN, door_status)
 
     @requests_mock.Mocker()
     def test_get_lock_door_status_with_unknown_response(self, mock):
@@ -206,10 +206,10 @@ class TestApi(unittest.TestCase):
             text="{\"doorState\": \"not_advertising\"}")
 
         api = Api()
-        doorStatus = api.get_lock_door_status(ACCESS_TOKEN, lock_id)
+        door_status = api.get_lock_door_status(ACCESS_TOKEN, lock_id)
 
-        self.assertEqual(LockDoorStatus.UNKNOWN, doorStatus)
-        
+        self.assertEqual(LockDoorStatus.UNKNOWN, door_status)
+
     @requests_mock.Mocker()
     def test_lock(self, mock):
         lock_id = 1234
