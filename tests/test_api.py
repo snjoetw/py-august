@@ -27,28 +27,29 @@ class TestApi(unittest.TestCase):
             text=load_fixture("get_doorbells.json"))
 
         api = Api()
-        doorbells = api.get_doorbells(ACCESS_TOKEN)
+        doorbells = sorted(api.get_doorbells(ACCESS_TOKEN),
+                           key=lambda d: d.device_id)
 
         self.assertEqual(2, len(doorbells))
 
         first = doorbells[0]
-        self.assertEqual("K98GiDT45GUL", first.device_id)
-        self.assertEqual("tBXZR0Z35E", first.serial_number)
-        self.assertEqual("Front Door", first.device_name)
-        self.assertEqual("doorbell_call_status_online", first.status)
-        self.assertEqual(True, first.has_subscription)
-        self.assertEqual("https://image.com/vmk16naaaa7ibuey7sar.jpg",
-                         first.image_url)
-        self.assertEqual("3dd2accaea08", first.house_id)
+        self.assertEqual("1KDAbJH89XYZ", first.device_id)
+        self.assertEqual("aaaaR08888", first.serial_number)
+        self.assertEqual("Back Door", first.device_name)
+        self.assertEqual("doorbell_call_status_offline", first.status)
+        self.assertEqual(False, first.has_subscription)
+        self.assertEqual(None, first.image_url)
+        self.assertEqual("3dd2accadddd", first.house_id)
 
         second = doorbells[1]
-        self.assertEqual("1KDAbJH89XYZ", second.device_id)
-        self.assertEqual("aaaaR08888", second.serial_number)
-        self.assertEqual("Back Door", second.device_name)
-        self.assertEqual("doorbell_call_status_offline", second.status)
-        self.assertEqual(False, second.has_subscription)
-        self.assertEqual(None, second.image_url)
-        self.assertEqual("3dd2accadddd", second.house_id)
+        self.assertEqual("K98GiDT45GUL", second.device_id)
+        self.assertEqual("tBXZR0Z35E", second.serial_number)
+        self.assertEqual("Front Door", second.device_name)
+        self.assertEqual("doorbell_call_status_online", second.status)
+        self.assertEqual(True, second.has_subscription)
+        self.assertEqual("https://image.com/vmk16naaaa7ibuey7sar.jpg",
+                         second.image_url)
+        self.assertEqual("3dd2accaea08", second.house_id)
 
     @requests_mock.Mocker()
     def test_get_doorbell_detail(self, mock):
@@ -79,7 +80,7 @@ class TestApi(unittest.TestCase):
             text=load_fixture("get_locks.json"))
 
         api = Api()
-        locks = api.get_locks(ACCESS_TOKEN)
+        locks = sorted(api.get_locks(ACCESS_TOKEN), key=lambda d: d.device_id)
 
         self.assertEqual(2, len(locks))
 
