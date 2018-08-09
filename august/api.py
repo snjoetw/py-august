@@ -68,7 +68,7 @@ OPEN_STATUS = ("open", "kAugLockDoorState_Open")
 def _determine_lock_status(status):
     if status in LOCKED_STATUS:
         return LockStatus.LOCKED
-    elif status in UNLOCKED_STATUS:
+    if status in UNLOCKED_STATUS:
         return LockStatus.UNLOCKED
     return LockStatus.UNKNOWN
 
@@ -76,7 +76,7 @@ def _determine_lock_status(status):
 def _determine_lock_door_status(status):
     if status in CLOSED_STATUS:
         return LockDoorStatus.CLOSED
-    elif status in OPEN_STATUS:
+    if status in OPEN_STATUS:
         return LockDoorStatus.OPEN
     return LockDoorStatus.UNKNOWN
 
