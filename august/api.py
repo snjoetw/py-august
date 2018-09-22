@@ -1,6 +1,7 @@
 import logging
 
-import requests
+import urllib2
+import json as _json
 
 from august.activity import DoorbellDingActivity, DoorbellMotionActivity, \
     DoorbellViewActivity, LockOperationActivity
@@ -123,10 +124,10 @@ class Api:
         return response
 
     def get_doorbells(self, access_token):
-        json = self._call_api(
+        json = _json.loads(self._call_api(
             "get",
             API_GET_DOORBELLS_URL,
-            access_token=access_token).json()
+            access_token=access_token))
 
         return [Doorbell(device_id, data) for device_id, data in json.items()]
 
@@ -136,7 +137,7 @@ class Api:
             API_GET_DOORBELL_URL.format(doorbell_id=doorbell_id),
             access_token=access_token)
 
-        return DoorbellDetail(response.json())
+        return DoorbellDetail(_json.loads(response))
 
     def wakeup_doorbell(self, access_token, doorbell_id):
         self._call_api(
@@ -152,7 +153,7 @@ class Api:
             API_GET_HOUSES_URL,
             access_token=access_token)
 
-        return response.json()
+        return _json.loads(response)
 
     def get_house(self, access_token, house_id):
         response = self._call_api(
@@ -160,7 +161,7 @@ class Api:
             API_GET_HOUSE_URL.format(house_id=house_id),
             access_token=access_token)
 
-        return response.json()
+        return _json.loads(response)
 
     def get_house_activities(self, access_token, house_id, limit=8):
         response = self._call_api(
@@ -172,7 +173,7 @@ class Api:
             })
 
         activities = []
-        for activity_json in response.json():
+        for activity_json in _json.loads(response):
             action = activity_json.get("action")
 
             if action in ["doorbell_call_missed", "doorbell_call_hangup"]:
@@ -187,10 +188,10 @@ class Api:
         return activities
 
     def get_locks(self, access_token):
-        json = self._call_api(
+        json = _json.loads(self._call_api(
             "get",
             API_GET_LOCKS_URL,
-            access_token=access_token).json()
+            access_token=access_token))
 
         return [Lock(device_id, data) for device_id, data in json.items()]
 
@@ -205,39 +206,42 @@ class Api:
             API_GET_LOCK_URL.format(lock_id=lock_id),
             access_token=access_token)
 
-        return LockDetail(response.json())
+        return LockDetail(_json.loads(response))
 
     def get_lock_status(self, access_token, lock_id):
-        json = self._call_api(
+        json = _json.loads(self._call_api(
             "get",
             API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
-            access_token=access_token).json()
+            access_token=access_token))
 
         return _determine_lock_status(json["status"])
 
-    def get_lock_door_status(self, access_token, lock_id):
-        json = self._call_api(
+    def get_lock_door_status(self, access_token, lock_id, tup=False):
+        json = _json.loads(self._call_api(
             "get",
             API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
-            access_token=access_token).json()
+            access_token=access_token))
 
-        return _determine_lock_door_status(json["doorState"])
+        if not tup:
+            return _determine_lock_door_status(json["doorState"])
+        else:
+            return (_determine_lock_door_status(json["doorState"]), _determine_lock_status(json["status"]))
 
     def lock(self, access_token, lock_id):
-        json = self._call_api(
+        json = _json.loads(self._call_api(
             "put",
             API_LOCK_URL.format(lock_id=lock_id),
             access_token=access_token,
-            timeout=self._command_timeout).json()
+            timeout=self._command_timeout))
 
         return _determine_lock_status(json["status"])
 
     def unlock(self, access_token, lock_id):
-        json = self._call_api(
+        json = _json.loads(self._call_api(
             "put",
             API_UNLOCK_URL.format(lock_id=lock_id),
             access_token=access_token,
-            timeout=self._command_timeout).json()
+            timeout=self._command_timeout))
 
         return _determine_lock_status(json["status"])
 
@@ -253,10 +257,31 @@ class Api:
         _LOGGER.debug("About to call %s with header=%s and payload=%s", url,
                       kwargs["headers"], payload)
 
-        response = requests.request(method, url, **kwargs)
+        timeout=kwargs.pop('timeout', None)
+        if method == 'put':
+            request = PutRequest(url, **kwargs)
+        elif method == 'post':
+            json = _json.dumps(kwargs.get("json"))
+            dlen = len(json)
+            kwargs['headers']['Content-length'] = dlen
+            request = urllib2.Request(url, data=json, **kwargs)
+        else:
+            request = urllib2.Request(url, **kwargs)
+        response = urllib2.urlopen(request, timeout=timeout)
+        content = response.read()
 
-        _LOGGER.debug("Received API response: %s, %s", response.status_code,
-                      response.content)
+        _LOGGER.debug("Received API response: %s, %s", response.getcode(),
+                      content)
 
-        response.raise_for_status()
-        return response
+        if response.getcode() >= 400:
+            raise Exception('HTTP Code error')
+        return content
+
+
+class PutRequest(urllib2.Request):
+    '''class to handling putting with urllib2
+    copied from Hoons' answer on https://stackoverflow.com/questions/21243834'''
+    def __init__(self, *args, **kwargs):
+        return urllib2.Request.__init__(self, *args, **kwargs)
+    def get_method(self, *args, **kwargs):
+        return 'PUT'
