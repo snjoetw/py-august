@@ -1,6 +1,6 @@
 import logging
 
-import requests
+from requests import request, Session
 
 from august.activity import DoorbellDingActivity, DoorbellMotionActivity, \
     DoorbellViewActivity, LockOperationActivity
@@ -82,31 +82,11 @@ def _determine_lock_door_status(status):
 
 
 class Api:
-    def __init__(self, timeout=10, command_timeout=60, use_http_session=False):
+    def __init__(self, timeout=10, command_timeout=60,
+                 http_session: Session = None):
         self._timeout = timeout
         self._command_timeout = command_timeout
-        self._http_session = requests.Session() if use_http_session else None
-
-    def __del__(self):
-        """ Close the session if exist when this instance is destroyed
-
-        Not liked by all or everyone, but implementing this as an "in-case"
-        When Api class is called with use_http_session=True then method close
-        should be called to close the session before removing last reference
-        """
-        try:
-            self.close()
-        except Exception:
-            pass
-
-    def close(self):
-        """ Close the session
-
-        This method should be called before removing last reference to the
-        created Api instance to close the session.
-        """
-        if self._http_session is not None:
-            self._http_session.close()
+        self._http_session = http_session
 
     def get_session(self, install_id, identifier, password):
         response = self._call_api(
@@ -285,7 +265,7 @@ class Api:
 
         response = self._http_session.request(method, url, **kwargs) if\
             self._http_session is not None else\
-            requests.request(method, url, **kwargs)
+            request(method, url, **kwargs)
 
         _LOGGER.debug("Received API response: %s, %s", response.status_code,
                       response.content)
