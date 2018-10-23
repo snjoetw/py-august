@@ -100,7 +100,11 @@ class Api:
             pass
 
     def close(self):
-        """ Close the session """
+        """ Close the session
+
+        This method should be called before removing last reference to the
+        created Api instance to close the session.
+        """
         if self._http_session is not None:
             self._http_session.close()
 
