@@ -2,10 +2,23 @@ import logging
 
 import requests
 
-from august.activity import DoorbellDingActivity, DoorbellMotionActivity, \
-    DoorbellViewActivity, LockOperationActivity
-from august.doorbell import Doorbell, DoorbellDetail
-from august.lock import Lock, LockStatus, LockDoorStatus, LockDetail
+from august.activity import (
+    DoorbellDingActivity,
+    DoorbellMotionActivity,
+    DoorbellViewActivity,
+    LockOperationActivity
+)
+from august.doorbell import (
+    Doorbell,
+    DoorbellDetail
+)
+from august.pin import Pin
+from august.lock import (
+    Lock,
+    LockDetail,
+    LockDoorStatus,
+    LockStatus,
+)
 
 HEADER_ACCEPT_VERSION = "Accept-Version"
 HEADER_AUGUST_ACCESS_TOKEN = "x-august-access-token"
@@ -38,8 +51,10 @@ API_GET_HOUSE_URL = API_BASE_URL + "/houses/{house_id}"
 API_GET_LOCKS_URL = API_BASE_URL + "/users/locks/mine"
 API_GET_LOCK_URL = API_BASE_URL + "/locks/{lock_id}"
 API_GET_LOCK_STATUS_URL = API_BASE_URL + "/locks/{lock_id}/status"
+API_GET_PINS_URL = API_BASE_URL + "/locks/{lock_id}/pins"
 API_LOCK_URL = API_BASE_URL + "/remoteoperate/{lock_id}/lock"
 API_UNLOCK_URL = API_BASE_URL + "/remoteoperate/{lock_id}/unlock"
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -222,6 +237,14 @@ class Api:
             access_token=access_token).json()
 
         return _determine_lock_door_status(json["doorState"])
+
+    def get_pins(self, access_token, lock_id):
+        json = self._call_api(
+            "get",
+            API_GET_PINS_URL.format(lock_id=lock_id),
+            access_token=access_token
+        ).json()
+        return [Pin(**pin) for pin in json.get('loaded', [])]
 
     def lock(self, access_token, lock_id):
         json = self._call_api(
