@@ -1,6 +1,6 @@
 import logging
 
-import requests
+from requests import request, Session
 
 from august.activity import (
     DoorbellDingActivity,
@@ -97,9 +97,11 @@ def _determine_lock_door_status(status):
 
 
 class Api:
-    def __init__(self, timeout=10, command_timeout=60):
+    def __init__(self, timeout=10, command_timeout=60,
+                 http_session: Session = None):
         self._timeout = timeout
         self._command_timeout = command_timeout
+        self._http_session = http_session
 
     def get_session(self, install_id, identifier, password):
         response = self._call_api(
@@ -222,21 +224,29 @@ class Api:
 
         return LockDetail(response.json())
 
-    def get_lock_status(self, access_token, lock_id):
+    def get_lock_status(self, access_token, lock_id, door_status=False):
         json = self._call_api(
             "get",
             API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
             access_token=access_token).json()
 
-        return _determine_lock_status(json["status"])
+        if door_status:
+            return (_determine_lock_status(json.get("status")),
+                    _determine_lock_door_status(json.get("doorState")))
 
-    def get_lock_door_status(self, access_token, lock_id):
+        return _determine_lock_status(json.get("status"))
+
+    def get_lock_door_status(self, access_token, lock_id, lock_status=False):
         json = self._call_api(
             "get",
             API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
             access_token=access_token).json()
 
-        return _determine_lock_door_status(json["doorState"])
+        if lock_status:
+            return (_determine_lock_door_status(json.get("doorState")),
+                    _determine_lock_status(json.get("status")))
+
+        return _determine_lock_door_status(json.get("doorState"))
 
     def get_pins(self, access_token, lock_id):
         json = self._call_api(
@@ -253,7 +263,7 @@ class Api:
             access_token=access_token,
             timeout=self._command_timeout).json()
 
-        return _determine_lock_status(json["status"])
+        return _determine_lock_status(json.get("status"))
 
     def unlock(self, access_token, lock_id):
         json = self._call_api(
@@ -262,7 +272,7 @@ class Api:
             access_token=access_token,
             timeout=self._command_timeout).json()
 
-        return _determine_lock_status(json["status"])
+        return _determine_lock_status(json.get("status"))
 
     def _call_api(self, method, url, access_token=None, **kwargs):
         payload = kwargs.get("params") or kwargs.get("json")
@@ -276,7 +286,9 @@ class Api:
         _LOGGER.debug("About to call %s with header=%s and payload=%s", url,
                       kwargs["headers"], payload)
 
-        response = requests.request(method, url, **kwargs)
+        response = self._http_session.request(method, url, **kwargs) if\
+            self._http_session is not None else\
+            request(method, url, **kwargs)
 
         _LOGGER.debug("Received API response: %s, %s", response.status_code,
                       response.content)
