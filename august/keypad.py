@@ -3,7 +3,6 @@ from august.device import DeviceDetail
 
 class KeypadDetail(DeviceDetail):
     def __init__(self, house_id, data):
-        print(data)
         super().__init__(
             data["_id"],
             None,
