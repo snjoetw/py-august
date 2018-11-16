@@ -132,6 +132,8 @@ class TestApi(unittest.TestCase):
         self.assertEqual("X2FSW05DGA", lock.serial_number)
         self.assertEqual("109717e9-3.0.44-3.0.30", lock.firmware_version)
         self.assertEqual(88, lock.battery_level)
+        self.assertEqual("Medium", lock.keypad.battery_level)
+        self.assertEqual("5bc65c24e6ef2a263e1450a8", lock.keypad.device_id)
 
     @requests_mock.Mocker()
     def test_get_lock_status_with_locked_response(self, mock):

@@ -1,6 +1,7 @@
 from enum import Enum
 
 from august.device import Device, DeviceDetail
+from august.keypad import KeypadDetail
 
 
 class Lock(Device):
@@ -10,7 +11,6 @@ class Lock(Device):
             data["LockName"],
             data["HouseID"],
         )
-
         self._user_type = data["UserType"]
 
     @property
@@ -33,11 +33,21 @@ class LockDetail(DeviceDetail):
             data["SerialNumber"],
             data["currentFirmwareVersion"])
 
+        if 'keypad' in data:
+            self._keypad_detail = KeypadDetail(self.house_id, data['keypad'])
+        else:
+            self._keypad_detail = None
+
         self._battery_level = int(100 * data["battery"])
 
     @property
     def battery_level(self):
         return self._battery_level
+
+    @property
+    def keypad(self):
+        return self._keypad_detail
+
 
 
 class LockStatus(Enum):

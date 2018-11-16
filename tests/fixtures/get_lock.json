@@ -29,6 +29,15 @@
     "firmwareVersion": "2.3.0-RC153+201711151527",
     "operative": true
   },
+  "keypad": {
+    "_id": "5bc65c24e6ef2a263e1450a8",
+    "serialNumber": "K1GXB0054Z",
+    "lockID": "92412D1B44004595B5DEB134E151A8D3",
+    "currentFirmwareVersion": "2.27.0",
+    "battery": {},
+    "batteryLevel": "Medium",
+    "batteryRaw": 170
+  },
   "OfflineKeys": {
     "created": [],
     "loaded": [
