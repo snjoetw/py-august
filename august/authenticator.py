@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import uuid
+from datetime import datetime, timedelta
 from enum import Enum
 
 import requests
@@ -92,6 +93,26 @@ class Authenticator:
                 try:
                     self._authentication = from_authentication_json(
                         json.load(file))
+                    token_expired = datetime.strptime(
+                        self._authentication.access_token_expires,
+                        '%Y-%m-%dT%H:%M:%S.%fZ'
+                    ) - datetime.utcnow()
+                    # If token is to expire within 7 days then print a warning.
+                    if token_expired < timedelta(
+                            seconds=0):
+                        _LOGGER.error("Token has expired.")
+                        self._authentication = Authentication(
+                            AuthenticationState.REQUIRES_AUTHENTICATION,
+                            install_id=install_id)
+                    # If token is not expired but less then 7 days before it
+                    # will.
+                    elif token_expired  < timedelta(days=7):
+                        _LOGGER.warning("API Token is going to expire in %s "
+                                        "hours. Deleting file %s will result "
+                                        "in a new token being requested next"
+                                        " time",
+                                        token_expired,
+                                        access_token_cache_file)
                     return
                 except json.decoder.JSONDecodeError as error:
                     _LOGGER.error("Unable to read cache file (%s): %s",
