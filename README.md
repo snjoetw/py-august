@@ -75,4 +75,6 @@ validation_result = authenticator.validate_verification_code(123456)
 # If ValidationResult is VALIDATED, then you'll need to call authenticate() again to finish authentication process
 authentication = authenticator.authenticate()
 
+# Once you have authenticated and validated you can use the access token to make API calls
+locks = api.get_locks(authentication.access_token)
 
