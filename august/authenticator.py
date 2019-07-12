@@ -106,7 +106,7 @@ class Authenticator:
                             install_id=install_id)
                     # If token is not expired but less then 7 days before it
                     # will.
-                    elif token_expired  < timedelta(days=7):
+                    elif token_expired < timedelta(days=7):
                         _LOGGER.warning("API Token is going to expire in %s "
                                         "hours. Deleting file %s will result "
                                         "in a new token being requested next"
