@@ -1,11 +1,13 @@
 import os
 import unittest
+from datetime import datetime
 
 import requests_mock
+from dateutil.tz import tzutc
 
 from august.api import API_GET_DOORBELLS_URL, Api, API_GET_LOCKS_URL, \
     API_GET_LOCK_STATUS_URL, API_LOCK_URL, API_UNLOCK_URL, API_GET_LOCK_URL, \
-    API_GET_DOORBELL_URL
+    API_GET_DOORBELL_URL, API_GET_PINS_URL
 from august.lock import LockStatus, LockDoorStatus
 
 ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9"
@@ -16,6 +18,11 @@ def load_fixture(filename):
     path = os.path.join(os.path.dirname(__file__), 'fixtures', filename)
     with open(path) as fptr:
         return fptr.read()
+
+
+def utc_of(year, month, day, hour, minute, second, microsecond):
+    return datetime(year, month, day, hour, minute, second, microsecond,
+                    tzinfo=tzutc());
 
 
 class TestApi(unittest.TestCase):
@@ -155,14 +162,13 @@ class TestApi(unittest.TestCase):
             "get",
             API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
             text="{\"status\": \"kAugLockState_Locked\""
-                ",\"doorState\": \"kAugLockDoorState_Closed\"}")
+                 ",\"doorState\": \"kAugLockDoorState_Closed\"}")
 
         api = Api()
         status, door_status = api.get_lock_status(ACCESS_TOKEN, lock_id, True)
 
         self.assertEqual(LockStatus.LOCKED, status)
         self.assertEqual(LockDoorStatus.CLOSED, door_status)
-
 
     @requests_mock.Mocker()
     def test_get_lock_status_with_unlocked_response(self, mock):
@@ -223,7 +229,7 @@ class TestApi(unittest.TestCase):
             "get",
             API_GET_LOCK_STATUS_URL.format(lock_id=lock_id),
             text="{\"status\": \"kAugLockState_Unlocked\""
-                ",\"doorState\": \"kAugLockDoorState_Open\"}")
+                 ",\"doorState\": \"kAugLockDoorState_Open\"}")
 
         api = Api()
         door_status, status = api.get_lock_door_status(ACCESS_TOKEN, lock_id,
@@ -273,3 +279,40 @@ class TestApi(unittest.TestCase):
         status = api.unlock(ACCESS_TOKEN, lock_id)
 
         self.assertEqual(LockStatus.UNLOCKED, status)
+
+    @requests_mock.Mocker()
+    def test_get_pins(self, mock):
+        lock_id = 1234
+        mock.register_uri(
+            "get",
+            API_GET_PINS_URL.format(lock_id=lock_id),
+            text=load_fixture("get_pins.json"))
+
+        api = Api()
+        pins = api.get_pins(ACCESS_TOKEN, lock_id)
+
+        self.assertEqual(1, len(pins))
+
+        first = pins[0]
+        self.assertEqual("epoZ87XSPqxlFdsaYyJiRRVR", first.pin_id)
+        self.assertEqual("A6697750D607098BAE8D6BAA11EF8063", first.lock_id)
+        self.assertEqual("c3b3a94f-473z-61a3-a8d1-a6e99482787a", first.user_id)
+        self.assertEqual("in-use", first.state)
+        self.assertEqual("123456", first.pin)
+        self.assertEqual(646545456465161, first.slot)
+        self.assertEqual("one-time", first.access_type)
+        self.assertEqual("John", first.first_name)
+        self.assertEqual("Doe", first.last_name)
+        self.assertEqual(True, first.unverified)
+        self.assertEqual(utc_of(2016, 11, 26, 22, 27, 11, 176000),
+                         first.created_at)
+        self.assertEqual(utc_of(2017, 11, 23, 00, 42, 19, 470000),
+                         first.updated_at)
+        self.assertEqual(utc_of(2017, 12, 10, 3, 12, 55, 563000),
+                         first.loaded_date)
+        self.assertEqual(utc_of(2018, 1, 1, 1, 1, 1, 563000),
+                         first.access_start_time)
+        self.assertEqual(utc_of(2018, 12, 1, 1, 1, 1, 563000),
+                         first.access_end_time)
+        self.assertEqual(utc_of(2018, 11, 5, 10, 2, 41, 684000),
+                         first.access_times)

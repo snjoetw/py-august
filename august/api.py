@@ -254,7 +254,8 @@ class Api:
             API_GET_PINS_URL.format(lock_id=lock_id),
             access_token=access_token
         ).json()
-        return [Pin(**pin) for pin in json.get('loaded', [])]
+
+        return [Pin(pin_json) for pin_json in json.get('loaded', [])]
 
     def lock(self, access_token, lock_id):
         json = self._call_api(

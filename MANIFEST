@@ -6,4 +6,6 @@ august/api.py
 august/authenticator.py
 august/device.py
 august/doorbell.py
+august/keypad.py
 august/lock.py
+august/pin.py

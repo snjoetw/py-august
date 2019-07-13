@@ -1,0 +1,22 @@
+{
+  "loaded": [
+    {
+      "_id": "epoZ87XSPqxlFdsaYyJiRRVR",
+      "lockID": "A6697750D607098BAE8D6BAA11EF8063",
+      "userID": "c3b3a94f-473z-61a3-a8d1-a6e99482787a",
+      "state": "in-use",
+      "pin": "123456",
+      "slot": 646545456465161,
+      "accessType": "one-time",
+      "accessStartTime": "2018-01-01T01:01:01.563Z",
+      "accessEndTime": "2018-12-01T01:01:01.563Z",
+      "accessTimes":"2018-11-05T10:02:41.684Z",
+      "createdAt": "2016-11-26T22:27:11.176Z",
+      "updatedAt": "2017-11-23T00:42:19.470Z",
+      "loadedDate": "2017-12-10T03:12:55.563Z",
+      "firstName": "John",
+      "lastName": "Doe",
+      "unverified": true
+    }
+  ]
+}
