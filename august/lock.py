@@ -49,7 +49,6 @@ class LockDetail(DeviceDetail):
         return self._keypad_detail
 
 
-
 class LockStatus(Enum):
     LOCKED = "locked"
     UNLOCKED = "unlocked"

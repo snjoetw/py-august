@@ -22,7 +22,7 @@ def load_fixture(filename):
 
 def utc_of(year, month, day, hour, minute, second, microsecond):
     return datetime(year, month, day, hour, minute, second, microsecond,
-                    tzinfo=tzutc());
+                    tzinfo=tzutc())
 
 
 class TestApi(unittest.TestCase):
