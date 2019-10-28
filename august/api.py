@@ -275,6 +275,14 @@ class Api:
 
         return _determine_lock_status(json.get("status"))
 
+    def refresh_access_token(self, access_token):
+        response = self._call_api(
+            "get",
+            API_GET_HOUSES_URL,
+            access_token=access_token)
+
+        return response.headers[HEADER_AUGUST_ACCESS_TOKEN]
+
     def _call_api(self, method, url, access_token=None, **kwargs):
         payload = kwargs.get("params") or kwargs.get("json")
 
