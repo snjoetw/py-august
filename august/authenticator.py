@@ -183,17 +183,20 @@ class Authenticator:
         return ValidationResult.VALIDATED
 
     def should_refresh(self):
-        return (self._authentication.state == AuthenticationState.AUTHENTICATED and (
-            (self._authentication.parsed_expiration_time() - datetime.utcnow())
-            < self._access_token_renewal_threshold))
+        return (self._authentication.state ==
+                AuthenticationState.AUTHENTICATED and (
+                    (self._authentication.parsed_expiration_time()
+                     - datetime.utcnow())
+                    < self._access_token_renewal_threshold))
 
     def refresh_access_token(self, force=False):
         if not self.should_refresh() and not force:
-            return False
+            return self._authentication
 
         if self._authentication.state != AuthenticationState.AUTHENTICATED:
-            _LOGGER.warning("Tried to refresh access token when not authenticated")
-            return False
+            _LOGGER.warning(
+                "Tried to refresh access token when not authenticated")
+            return self._authentication
 
         refreshed_token = self._api.refresh_access_token(
             self._authentication.access_token)
@@ -202,7 +205,7 @@ class Authenticator:
 
         if 'exp' not in jwt_claims:
             _LOGGER.warning("Did not find expected `exp' claim in JWT")
-            return False
+            return self._authentication
 
         new_expiration = datetime.utcfromtimestamp(jwt_claims['exp'])
         self._authentication = Authentication(
@@ -213,7 +216,7 @@ class Authenticator:
         self._cache_authentication(self._authentication)
 
         _LOGGER.info("Successfully refreshed access token")
-        return True
+        return self._authentication
 
     def _cache_authentication(self, authentication):
         if self._access_token_cache_file is not None:

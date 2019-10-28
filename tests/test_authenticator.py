@@ -1,10 +1,10 @@
 import unittest
-from unittest.mock import patch, Mock
+from datetime import datetime
+from unittest.mock import Mock, patch
 
+from august.authenticator import (AuthenticationState, Authenticator,
+                                  ValidationResult)
 from requests import RequestException
-
-from august.authenticator import Authenticator, AuthenticationState, \
-    ValidationResult
 
 
 class TestAuthenticator(unittest.TestCase):
@@ -21,11 +21,27 @@ class TestAuthenticator(unittest.TestCase):
             "x-august-access-token": "access_token"
         }
         session_response.json.return_value = {
-            "expiresAt": "",
+            "expiresAt": datetime.utcfromtimestamp(0).isoformat(),
             "vPassword": v_password,
             "vInstallId": v_install_id
         }
         mock_api.get_session.return_value = session_response
+
+    @patch('august.api.Api')
+    def test_refresh_token(self, mock_api):
+        self._setup_session_response(mock_api, True, True)
+
+        authenticator = self._create_authenticator(mock_api)
+        access = authenticator.authenticate()
+
+        token = "e30=.eyJleHAiOjEzMzd9.e30="
+        mock_api.refresh_access_token.return_value = token
+
+        access_token = authenticator.refresh_access_token(force=False)
+
+        self.assertEqual(token, access_token.access_token)
+        self.assertEqual(datetime.utcfromtimestamp(1337),
+            access_token.parsed_expiration_time())
 
     @patch('august.api.Api')
     def test_get_session_with_authenticated_response(self, mock_api):
