@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 import os
@@ -5,9 +6,12 @@ import uuid
 from datetime import datetime, timedelta
 from enum import Enum
 
+import dateutil.parser
 import requests
-
 from august.api import HEADER_AUGUST_ACCESS_TOKEN
+
+# The default time before expiration to refresh a token
+DEFAULT_RENEWAL_THRESHOLD = timedelta(days=7)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,6 +69,12 @@ class Authentication:
     def state(self, value):
         self._state = value
 
+    def parsed_expiration_time(self):
+        return dateutil.parser.parse(self.access_token_expires)
+
+    def is_expired(self):
+        return self.parsed_expiration_time() < datetime.utcnow()
+
 
 class AuthenticationState(Enum):
     REQUIRES_AUTHENTICATION = "requires_authentication"
@@ -80,12 +90,14 @@ class ValidationResult(Enum):
 
 class Authenticator:
     def __init__(self, api, login_method, username, password, install_id=None,
-                 access_token_cache_file=None):
+                 access_token_cache_file=None,
+                 access_token_renewal_threshold=DEFAULT_RENEWAL_THRESHOLD):
         self._api = api
         self._login_method = login_method
         self._username = username
         self._password = password
         self._access_token_cache_file = access_token_cache_file
+        self._access_token_renewal_threshold = access_token_renewal_threshold
 
         if (access_token_cache_file is not None and
                 os.path.exists(access_token_cache_file)):
@@ -93,25 +105,23 @@ class Authenticator:
                 try:
                     self._authentication = from_authentication_json(
                         json.load(file))
-                    token_expired = datetime.strptime(
-                        self._authentication.access_token_expires,
-                        '%Y-%m-%dT%H:%M:%S.%fZ'
-                    ) - datetime.utcnow()
+
                     # If token is to expire within 7 days then print a warning.
-                    if token_expired < timedelta(
-                            seconds=0):
+                    if self._authentication.is_expired():
                         _LOGGER.error("Token has expired.")
                         self._authentication = Authentication(
                             AuthenticationState.REQUIRES_AUTHENTICATION,
                             install_id=install_id)
                     # If token is not expired but less then 7 days before it
                     # will.
-                    elif token_expired < timedelta(days=7):
-                        _LOGGER.warning("API Token is going to expire in %s "
+                    elif (self._authentication.parsed_expiration_time()
+                          - datetime.utcnow()) < timedelta(days=7):
+                        exp_time = self._authentication.access_token_expires
+                        _LOGGER.warning("API Token is going to expire at %s "
                                         "hours. Deleting file %s will result "
                                         "in a new token being requested next"
                                         " time",
-                                        token_expired,
+                                        exp_time,
                                         access_token_cache_file)
                     return
                 except json.decoder.JSONDecodeError as error:
@@ -171,6 +181,39 @@ class Authenticator:
             return ValidationResult.INVALID_VERIFICATION_CODE
 
         return ValidationResult.VALIDATED
+
+    def should_refresh(self):
+        return (self._authentication.state == AuthenticationState.AUTHENTICATED and (
+            (self._authentication.parsed_expiration_time() - datetime.utcnow())
+            < self._access_token_renewal_threshold))
+
+    def refresh_access_token(self, force=False):
+        if not self.should_refresh() and not force:
+            return False
+
+        if self._authentication.state != AuthenticationState.AUTHENTICATED:
+            _LOGGER.warning("Tried to refresh access token when not authenticated")
+            return False
+
+        refreshed_token = self._api.refresh_access_token(
+            self._authentication.access_token)
+        jwt_parts = refreshed_token.split(".")
+        jwt_claims = json.loads(base64.b64decode(jwt_parts[1] + '==='))
+
+        if 'exp' not in jwt_claims:
+            _LOGGER.warning("Did not find expected `exp' claim in JWT")
+            return False
+
+        new_expiration = datetime.utcfromtimestamp(jwt_claims['exp'])
+        self._authentication = Authentication(
+            self._authentication.state,
+            install_id=self._authentication.install_id,
+            access_token=refreshed_token,
+            access_token_expires=new_expiration.isoformat())
+        self._cache_authentication(self._authentication)
+
+        _LOGGER.info("Successfully refreshed access token")
+        return True
 
     def _cache_authentication(self, authentication):
         if self._access_token_cache_file is not None:
