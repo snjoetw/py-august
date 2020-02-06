@@ -289,7 +289,7 @@ class Api:
                       kwargs["headers"], payload)
 
         attempts = 0
-        while(attempts < 3):
+        while(attempts < 10):
           attempts += 1
           response = self._http_session.request(method, url, **kwargs) if\
               self._http_session is not None else\
@@ -298,7 +298,7 @@ class Api:
               response.content)
           if (response.status_code == 429):
             _LOGGER.debug("August sent a 429 (attempt: %d), sleeping and trying again", attempts)
-            time.sleep(2)
+            time.sleep(3)
             continue
           break
 
