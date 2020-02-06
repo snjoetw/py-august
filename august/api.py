@@ -30,7 +30,7 @@ HEADER_USER_AGENT = "User-Agent"
 
 HEADER_VALUE_API_KEY = "79fd0eb6-381d-4adf-95a0-47721289d1d9"
 HEADER_VALUE_CONTENT_TYPE = "application/json"
-HEADER_VALUE_USER_AGENT = "August/Luna-3.2.2"
+HEADER_VALUE_USER_AGENT = "August/2019.12.16.4708 CFNetwork/1121.2.2 Darwin/19.3.0"
 HEADER_VALUE_ACCEPT_VERSION = "0.0.1"
 
 API_BASE_URL = "https://api-production.august.com"
@@ -298,7 +298,7 @@ class Api:
               response.content)
           if (response.status_code == 429):
             _LOGGER.debug("August sent a 429 (attempt: %d), sleeping and trying again", attempts)
-            time.sleep(3)
+            time.sleep(2.5)
             continue
           break
 
