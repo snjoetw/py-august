@@ -1,4 +1,5 @@
 import logging
+import time
 
 from requests import request, Session
 
@@ -287,12 +288,19 @@ class Api:
         _LOGGER.debug("About to call %s with header=%s and payload=%s", url,
                       kwargs["headers"], payload)
 
-        response = self._http_session.request(method, url, **kwargs) if\
-            self._http_session is not None else\
-            request(method, url, **kwargs)
-
-        _LOGGER.debug("Received API response: %s, %s", response.status_code,
-                      response.content)
+        attempts = 0
+        while(attempts < 3):
+          attempts += 1
+          response = self._http_session.request(method, url, **kwargs) if\
+              self._http_session is not None else\
+              request(method, url, **kwargs)
+          _LOGGER.debug("Received API response: %s, %s", response.status_code,
+              response.content)
+          if (response.status_code == 429):
+            _LOGGER.debug("August sent a 429 (attempt: %d), sleeping and trying again", attempts)
+            time.sleep(2)
+            continue
+          break
 
         response.raise_for_status()
         return response
