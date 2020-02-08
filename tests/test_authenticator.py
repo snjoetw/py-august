@@ -1,11 +1,15 @@
 import unittest
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from unittest.mock import Mock, patch
 
 from requests import RequestException
 
 from august.authenticator import (AuthenticationState, Authenticator,
                                   ValidationResult)
+
+
+def format_datetime(dt):
+    return dt.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3] + 'Z'
 
 
 class TestAuthenticator(unittest.TestCase):
@@ -16,17 +20,48 @@ class TestAuthenticator(unittest.TestCase):
         return Authenticator(mock_api, "phone", "user", "pass",
                              install_id="install_id")
 
-    def _setup_session_response(self, mock_api, v_password, v_install_id):
+    def _setup_session_response(self, mock_api, v_password, v_install_id,
+                                expires_at=format_datetime(datetime.utcnow())):
         session_response = Mock()
         session_response.headers = {
             "x-august-access-token": "access_token"
         }
         session_response.json.return_value = {
-            "expiresAt": datetime.utcfromtimestamp(0).isoformat(),
+            "expiresAt": expires_at,
             "vPassword": v_password,
             "vInstallId": v_install_id
         }
         mock_api.get_session.return_value = session_response
+
+    @patch('august.api.Api')
+    def test_should_refresh_when_token_expiry_is_after_renewal_threshold(self,
+                                                                         mock_api):
+        expired_expires_at = format_datetime(
+            datetime.now(timezone.utc) + timedelta(days=6))
+        self._setup_session_response(mock_api, True, True,
+                                     expires_at=expired_expires_at)
+
+        authenticator = self._create_authenticator(mock_api)
+        authenticator.authenticate()
+
+        should_refresh = authenticator.should_refresh()
+
+        self.assertEqual(True, should_refresh)
+
+    @patch('august.api.Api')
+    def test_should_refresh_when_token_expiry_is_before_renewal_threshold(self,
+                                                                          mock_api):
+        not_expired_expires_at = format_datetime(
+            datetime.now(timezone.utc) + timedelta(days=8))
+        self._setup_session_response(mock_api, True, True,
+                                     expires_at=not_expired_expires_at)
+
+        authenticator = self._create_authenticator(mock_api)
+        authenticator.authenticate()
+
+        should_refresh = authenticator.should_refresh()
+
+        self.assertEqual(False, should_refresh)
 
     @patch('august.api.Api')
     def test_refresh_token(self, mock_api):
