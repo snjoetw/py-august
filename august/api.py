@@ -13,13 +13,13 @@ from august.doorbell import (
     Doorbell,
     DoorbellDetail
 )
-from august.pin import Pin
 from august.lock import (
     Lock,
     LockDetail,
     LockDoorStatus,
     LockStatus,
 )
+from august.pin import Pin
 
 HEADER_ACCEPT_VERSION = "Accept-Version"
 HEADER_AUGUST_ACCESS_TOKEN = "x-august-access-token"
@@ -55,7 +55,6 @@ API_GET_LOCK_STATUS_URL = API_BASE_URL + "/locks/{lock_id}/status"
 API_GET_PINS_URL = API_BASE_URL + "/locks/{lock_id}/pins"
 API_LOCK_URL = API_BASE_URL + "/remoteoperate/{lock_id}/lock"
 API_UNLOCK_URL = API_BASE_URL + "/remoteoperate/{lock_id}/unlock"
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -297,18 +296,21 @@ class Api:
                       kwargs["headers"], payload)
 
         attempts = 0
-        while(attempts < 10):
-          attempts += 1
-          response = self._http_session.request(method, url, **kwargs) if\
-              self._http_session is not None else\
-              request(method, url, **kwargs)
-          _LOGGER.debug("Received API response: %s, %s", response.status_code,
-              response.content)
-          if (response.status_code == 429):
-            _LOGGER.debug("August sent a 429 (attempt: %d), sleeping and trying again", attempts)
-            time.sleep(2.5)
-            continue
-          break
+        while attempts < 10:
+            attempts += 1
+            response = self._http_session.request(method, url, **kwargs) if \
+                self._http_session is not None else \
+                request(method, url, **kwargs)
+            _LOGGER.debug("Received API response: %s, %s",
+                          response.status_code,
+                          response.content)
+            if response.status_code == 429:
+                _LOGGER.debug(
+                    "August sent a 429 (attempt: %d), sleeping and trying again",
+                    attempts)
+                time.sleep(2.5)
+                continue
+            break
 
         response.raise_for_status()
         return response
