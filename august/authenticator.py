@@ -3,7 +3,7 @@ import json
 import logging
 import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 
 import dateutil.parser
@@ -73,7 +73,7 @@ class Authentication:
         return dateutil.parser.parse(self.access_token_expires)
 
     def is_expired(self):
-        return self.parsed_expiration_time() < datetime.utcnow()
+        return self.parsed_expiration_time() < datetime.now(timezone.utc)
 
 
 class AuthenticationState(Enum):
@@ -115,7 +115,7 @@ class Authenticator:
                     # If token is not expired but less then 7 days before it
                     # will.
                     elif (self._authentication.parsed_expiration_time()
-                          - datetime.utcnow()) < timedelta(days=7):
+                          - datetime.now(timezone.utc)) < timedelta(days=7):
                         exp_time = self._authentication.access_token_expires
                         _LOGGER.warning("API Token is going to expire at %s "
                                         "hours. Deleting file %s will result "
@@ -186,7 +186,7 @@ class Authenticator:
         return (self._authentication.state ==
                 AuthenticationState.AUTHENTICATED and (
                     (self._authentication.parsed_expiration_time()
-                     - datetime.utcnow())
+                     - datetime.now(timezone.utc))
                     < self._access_token_renewal_threshold))
 
     def refresh_access_token(self, force=False):
