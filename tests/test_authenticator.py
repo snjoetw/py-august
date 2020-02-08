@@ -2,9 +2,10 @@ import unittest
 from datetime import datetime
 from unittest.mock import Mock, patch
 
+from requests import RequestException
+
 from august.authenticator import (AuthenticationState, Authenticator,
                                   ValidationResult)
-from requests import RequestException
 
 
 class TestAuthenticator(unittest.TestCase):
@@ -32,7 +33,7 @@ class TestAuthenticator(unittest.TestCase):
         self._setup_session_response(mock_api, True, True)
 
         authenticator = self._create_authenticator(mock_api)
-        access = authenticator.authenticate()
+        authenticator.authenticate()
 
         token = "e30=.eyJleHAiOjEzMzd9.e30="
         mock_api.refresh_access_token.return_value = token
@@ -41,7 +42,7 @@ class TestAuthenticator(unittest.TestCase):
 
         self.assertEqual(token, access_token.access_token)
         self.assertEqual(datetime.utcfromtimestamp(1337),
-            access_token.parsed_expiration_time())
+                         access_token.parsed_expiration_time())
 
     @patch('august.api.Api')
     def test_get_session_with_authenticated_response(self, mock_api):
