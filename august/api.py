@@ -1,4 +1,5 @@
 import logging
+import time
 
 from requests import request, Session
 
@@ -29,7 +30,7 @@ HEADER_USER_AGENT = "User-Agent"
 
 HEADER_VALUE_API_KEY = "79fd0eb6-381d-4adf-95a0-47721289d1d9"
 HEADER_VALUE_CONTENT_TYPE = "application/json"
-HEADER_VALUE_USER_AGENT = "August/Luna-3.2.2"
+HEADER_VALUE_USER_AGENT = "August/2019.12.16.4708 CFNetwork/1121.2.2 Darwin/19.3.0"
 HEADER_VALUE_ACCEPT_VERSION = "0.0.1"
 
 API_BASE_URL = "https://api-production.august.com"
@@ -287,12 +288,19 @@ class Api:
         _LOGGER.debug("About to call %s with header=%s and payload=%s", url,
                       kwargs["headers"], payload)
 
-        response = self._http_session.request(method, url, **kwargs) if\
-            self._http_session is not None else\
-            request(method, url, **kwargs)
-
-        _LOGGER.debug("Received API response: %s, %s", response.status_code,
-                      response.content)
+        attempts = 0
+        while(attempts < 10):
+          attempts += 1
+          response = self._http_session.request(method, url, **kwargs) if\
+              self._http_session is not None else\
+              request(method, url, **kwargs)
+          _LOGGER.debug("Received API response: %s, %s", response.status_code,
+              response.content)
+          if (response.status_code == 429):
+            _LOGGER.debug("August sent a 429 (attempt: %d), sleeping and trying again", attempts)
+            time.sleep(2.5)
+            continue
+          break
 
         response.raise_for_status()
         return response
