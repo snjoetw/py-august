@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime, timezone, timedelta
+from dateutil.tz import tzutc
 from unittest.mock import Mock, patch
 
 from requests import RequestException
@@ -76,7 +77,7 @@ class TestAuthenticator(unittest.TestCase):
         access_token = authenticator.refresh_access_token(force=False)
 
         self.assertEqual(token, access_token.access_token)
-        self.assertEqual(datetime.utcfromtimestamp(1337),
+        self.assertEqual(datetime.fromtimestamp(1337, tz=tzutc()),
                          access_token.parsed_expiration_time())
 
     @patch('august.api.Api')
