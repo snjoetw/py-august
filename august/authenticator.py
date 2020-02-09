@@ -208,11 +208,15 @@ class Authenticator:
             return self._authentication
 
         new_expiration = datetime.utcfromtimestamp(jwt_claims['exp'])
+        # The august api always returns expiresAt with a timezone
+        # from the get_session api call
+        # It is important we store access_token_expires formatted
+        # with a timezone for comparison
         self._authentication = Authentication(
             self._authentication.state,
             install_id=self._authentication.install_id,
             access_token=refreshed_token,
-            access_token_expires=new_expiration.isoformat())
+            access_token_expires=new_expiration.astimezone().isoformat())
         self._cache_authentication(self._authentication)
 
         _LOGGER.info("Successfully refreshed access token")

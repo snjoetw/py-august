@@ -76,7 +76,7 @@ class TestAuthenticator(unittest.TestCase):
         access_token = authenticator.refresh_access_token(force=False)
 
         self.assertEqual(token, access_token.access_token)
-        self.assertEqual(datetime.utcfromtimestamp(1337),
+        self.assertEqual(datetime.utcfromtimestamp(1337).astimezone(),
                          access_token.parsed_expiration_time())
 
     @patch('august.api.Api')
