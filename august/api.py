@@ -198,7 +198,7 @@ class Api:
                 activities.append(DoorbellMotionActivity(activity_json))
             elif action == "doorbell_call_initiated":
                 activities.append(DoorbellViewActivity(activity_json))
-            elif action in ["lock", "unlock"]:
+            elif action in ["lock", "unlock", "onetouchlock"]:
                 activities.append(LockOperationActivity(activity_json))
 
         return activities
