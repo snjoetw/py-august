@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='py-august',
-    version='0.10.1',
+    version='0.11.0',
     packages=['august'],
     url='https://github.com/snjoetw/py-august',
     license='MIT',
