@@ -1,12 +1,20 @@
 from datetime import datetime
 from enum import Enum
-
+from august.lock import LockStatus, LockDoorStatus
 
 DOORBELL_DING_ACTIVITY_ACTIONS = ["doorbell_call_missed", "doorbell_call_hangup"]
 DOORBELL_MOTION_ACTIVITY_ACTIONS = ["doorbell_motion_detected"]
 DOORBELL_VIEW_ACTIVITY_ACTIONS = ["doorbell_call_initiated"]
 LOCK_OPERATION_ACTIVITY_ACTIONS = ["lock", "unlock", "onetouchlock"]
 DOOR_OPERATION_ACTIVITY_ACTIONS = ["doorclosed", "dooropen"]
+
+ACTIVITY_ACTION_STATES = {
+    "onetouchlock": LockStatus.LOCKED,
+    "lock": LockStatus.LOCKED,
+    "unlock": LockStatus.UNLOCKED,
+    "dooropen": LockDoorStatus.OPEN,
+    "doorclosed": LockDoorStatus.CLOSED,
+}
 
 def epoch_to_datetime(epoch):
     return datetime.fromtimestamp(int(epoch) / 1000.0)
