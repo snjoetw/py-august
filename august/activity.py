@@ -2,6 +2,12 @@ from datetime import datetime
 from enum import Enum
 
 
+DOORBELL_DING_ACTIVITY_ACTIONS = ["doorbell_call_missed", "doorbell_call_hangup"]
+DOORBELL_MOTION_ACTIVITY_ACTIONS = ["doorbell_motion_detected"]
+DOORBELL_VIEW_ACTIVITY_ACTIONS = ["doorbell_call_initiated"]
+LOCK_OPERATION_ACTIVITY_ACTIONS = ["lock", "unlock", "onetouchlock"]
+DOOR_OPERATION_ACTIVITY_ACTIONS = ["doorclosed", "dooropen"]
+
 def epoch_to_datetime(epoch):
     return datetime.fromtimestamp(int(epoch) / 1000.0)
 
