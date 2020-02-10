@@ -1,30 +1,18 @@
 import logging
 import time
 
-from requests import request, Session
+from requests import Session, request
 
-from august.activity import (
-    ACTIVITY_ACTIONS_DOORBELL_DING,
-    ACTIVITY_ACTIONS_DOORBELL_MOTION,
-    ACTIVITY_ACTIONS_DOORBELL_VIEW,
-    ACTIVITY_ACTIONS_LOCK_OPERATION,
-    ACTIVITY_ACTIONS_DOOR_OPERATION,
-    DoorbellDingActivity,
-    DoorbellMotionActivity,
-    DoorbellViewActivity,
-    LockOperationActivity,
-    DoorOperationActivity
-)
-from august.doorbell import (
-    Doorbell,
-    DoorbellDetail
-)
-from august.lock import (
-    Lock,
-    LockDetail,
-    LockDoorStatus,
-    LockStatus,
-)
+from august.activity import (ACTIVITY_ACTIONS_DOOR_OPERATION,
+                             ACTIVITY_ACTIONS_DOORBELL_DING,
+                             ACTIVITY_ACTIONS_DOORBELL_MOTION,
+                             ACTIVITY_ACTIONS_DOORBELL_VIEW,
+                             ACTIVITY_ACTIONS_LOCK_OPERATION,
+                             DoorbellDingActivity, DoorbellMotionActivity,
+                             DoorbellViewActivity, DoorOperationActivity,
+                             LockOperationActivity)
+from august.doorbell import Doorbell, DoorbellDetail
+from august.lock import Lock, LockDetail, LockDoorStatus, LockStatus
 from august.pin import Pin
 
 HEADER_ACCEPT_VERSION = "Accept-Version"

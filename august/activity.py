@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
-from august.lock import LockStatus, LockDoorStatus
+
+from august.lock import LockDoorStatus, LockStatus
 
 ACTION_LOCK_ONETOUCHLOCK = "onetouchlock"
 ACTION_LOCK_LOCK = "lock"

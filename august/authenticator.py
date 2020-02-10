@@ -8,6 +8,7 @@ from enum import Enum
 
 import dateutil.parser
 import requests
+
 from august.api import HEADER_AUGUST_ACCESS_TOKEN
 
 # The default time before expiration to refresh a token
