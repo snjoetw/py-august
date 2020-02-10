@@ -11,6 +11,7 @@ class ActivityType(Enum):
     DOORBELL_DING = "doorbell_ding"
     DOORBELL_VIEW = "doorbell_view"
     LOCK_OPERATION = "lock_operation"
+    DOOR_OPERATION = "door_operation"
 
 
 class Activity:
@@ -133,3 +134,7 @@ class LockOperationActivity(Activity):
     @property
     def operated_by(self):
         return self._operated_by
+
+class DoorOperationActivity(Activity):
+    def __init__(self, data):
+        super().__init__(ActivityType.DOOR_OPERATION, data)
