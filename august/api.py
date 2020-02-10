@@ -7,7 +7,8 @@ from august.activity import (
     DoorbellDingActivity,
     DoorbellMotionActivity,
     DoorbellViewActivity,
-    LockOperationActivity
+    LockOperationActivity,
+    DoorOperationActivity
 )
 from august.doorbell import (
     Doorbell,
@@ -200,6 +201,8 @@ class Api:
                 activities.append(DoorbellViewActivity(activity_json))
             elif action in ["lock", "unlock"]:
                 activities.append(LockOperationActivity(activity_json))
+            elif action in ["doorclosed", "dooropen"]:
+                activities.append(DoorOperationActivity(activity_json))
 
         return activities
 
