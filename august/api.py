@@ -4,15 +4,15 @@ import time
 from requests import request, Session
 
 from august.activity import (
-    DOORBELL_DING_ACTIVITY_ACTIONS,
+    ACTIVITY_ACTIONS_DOORBELL_DING,
+    ACTIVITY_ACTIONS_DOORBELL_MOTION,
+    ACTIVITY_ACTIONS_DOORBELL_VIEW,
+    ACTIVITY_ACTIONS_LOCK_OPERATION,
+    ACTIVITY_ACTIONS_DOOR_OPERATION,
     DoorbellDingActivity,
-    DOORBELL_MOTION_ACTIVITY_ACTIONS,
     DoorbellMotionActivity,
-    DOORBELL_VIEW_ACTIVITY_ACTIONS,
     DoorbellViewActivity,
-    LOCK_OPERATION_ACTIVITY_ACTIONS,
     LockOperationActivity,
-    DOOR_OPERATION_ACTIVITY_ACTIONS,
     DoorOperationActivity
 )
 from august.doorbell import (
@@ -198,15 +198,15 @@ class Api:
         for activity_json in response.json():
             action = activity_json.get("action")
 
-            if action in DOORBELL_DING_ACTIVITY_ACTIONS:
+            if action in ACTIVITY_ACTIONS_DOORBELL_DING:
                 activities.append(DoorbellDingActivity(activity_json))
-            elif action in DOORBELL_MOTION_ACTIVITY_ACTIONS:
+            elif action in ACTIVITY_ACTIONS_DOORBELL_MOTION:
                 activities.append(DoorbellMotionActivity(activity_json))
-            elif action in DOORBELL_VIEW_ACTIVITY_ACTIONS:
+            elif action in ACTIVITY_ACTIONS_DOORBELL_VIEW:
                 activities.append(DoorbellViewActivity(activity_json))
-            elif action in LOCK_OPERATION_ACTIVITY_ACTIONS:
+            elif action in ACTIVITY_ACTIONS_LOCK_OPERATION:
                 activities.append(LockOperationActivity(activity_json))
-            elif action in DOOR_OPERATION_ACTIVITY_ACTIONS:
+            elif action in ACTIVITY_ACTIONS_DOOR_OPERATION:
                 activities.append(DoorOperationActivity(activity_json))
 
         return activities

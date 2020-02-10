@@ -2,23 +2,32 @@ from datetime import datetime
 from enum import Enum
 from august.lock import LockStatus, LockDoorStatus
 
-DOORBELL_DING_ACTIVITY_ACTIONS = ["doorbell_call_missed", "doorbell_call_hangup"]
-DOORBELL_MOTION_ACTIVITY_ACTIONS = ["doorbell_motion_detected"]
-DOORBELL_VIEW_ACTIVITY_ACTIONS = ["doorbell_call_initiated"]
-LOCK_OPERATION_ACTIVITY_ACTIONS = ["lock", "unlock", "onetouchlock"]
-DOOR_OPERATION_ACTIVITY_ACTIONS = ["doorclosed", "dooropen"]
+ACTION_LOCK_ONETOUCHLOCK = "onetouchlock"
+ACTION_LOCK_LOCK = "lock"
+ACTION_LOCK_UNLOCK = "unlock"
+ACTION_DOOR_OPEN = "dooropen"
+ACTION_DOOR_CLOSED = "doorclosed"
+ACTION_DOORBELL_CALL_INITIATED = "doorbell_call_initiated"
+ACTION_DOORBELL_MOTION_DETECTED = "doorbell_motion_detected"
+ACTION_DOORBELL_CALL_MISSED = "doorbell_call_missed"
+ACTION_DOORBELL_CALL_HANGUP = "doorbell_call_hangup"
+
+ACTIVITY_ACTIONS_DOORBELL_DING = [ACTION_DOORBELL_CALL_MISSED, ACTION_DOORBELL_CALL_HANGUP]
+ACTIVITY_ACTIONS_DOORBELL_MOTION = [ACTION_DOORBELL_MOTION_DETECTED]
+ACTIVITY_ACTIONS_DOORBELL_VIEW = [ACTION_DOORBELL_CALL_INITIATED]
+ACTIVITY_ACTIONS_LOCK_OPERATION = [ACTION_LOCK_LOCK, ACTION_LOCK_UNLOCK, ACTION_LOCK_ONETOUCHLOCK]
+ACTIVITY_ACTIONS_DOOR_OPERATION = [ACTION_DOOR_CLOSED, ACTION_DOOR_OPEN]
 
 ACTIVITY_ACTION_STATES = {
-    "onetouchlock": LockStatus.LOCKED,
-    "lock": LockStatus.LOCKED,
-    "unlock": LockStatus.UNLOCKED,
-    "dooropen": LockDoorStatus.OPEN,
-    "doorclosed": LockDoorStatus.CLOSED,
+    ACTION_LOCK_ONETOUCHLOCK: LockStatus.LOCKED,
+    ACTION_LOCK_LOCK: LockStatus.LOCKED,
+    ACTION_LOCK_UNLOCK: LockStatus.UNLOCKED,
+    ACTION_DOOR_OPEN: LockDoorStatus.OPEN,
+    ACTION_DOOR_CLOSED: LockDoorStatus.CLOSED,
 }
 
 def epoch_to_datetime(epoch):
     return datetime.fromtimestamp(int(epoch) / 1000.0)
-
 
 class ActivityType(Enum):
     DOORBELL_MOTION = "doorbell_motion"
