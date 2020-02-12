@@ -27,8 +27,10 @@ ACTIVITY_ACTION_STATES = {
     ACTION_DOOR_CLOSED: LockDoorStatus.CLOSED,
 }
 
+
 def epoch_to_datetime(epoch):
     return datetime.fromtimestamp(int(epoch) / 1000.0)
+
 
 class ActivityType(Enum):
     DOORBELL_MOTION = "doorbell_motion"
