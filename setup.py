@@ -9,5 +9,5 @@ setup(
     author='snjoetw',
     author_email='snjoetw@gmail.com',
     description='Python API for August Smart Lock and Doorbell',
-    install_requires=['requests', 'vol']
+    install_requires=['requests', 'vol', 'python-dateutil']
 )
