@@ -1,25 +1,18 @@
 import logging
 import time
 
-from requests import request, Session
+from requests import Session, request
 
-from august.activity import (
-    DoorbellDingActivity,
-    DoorbellMotionActivity,
-    DoorbellViewActivity,
-    LockOperationActivity,
-    DoorOperationActivity
-)
-from august.doorbell import (
-    Doorbell,
-    DoorbellDetail
-)
-from august.lock import (
-    Lock,
-    LockDetail,
-    LockDoorStatus,
-    LockStatus,
-)
+from august.activity import (ACTIVITY_ACTIONS_DOOR_OPERATION,
+                             ACTIVITY_ACTIONS_DOORBELL_DING,
+                             ACTIVITY_ACTIONS_DOORBELL_MOTION,
+                             ACTIVITY_ACTIONS_DOORBELL_VIEW,
+                             ACTIVITY_ACTIONS_LOCK_OPERATION,
+                             DoorbellDingActivity, DoorbellMotionActivity,
+                             DoorbellViewActivity, DoorOperationActivity,
+                             LockOperationActivity)
+from august.doorbell import Doorbell, DoorbellDetail
+from august.lock import Lock, LockDetail, LockDoorStatus, LockStatus
 from august.pin import Pin
 
 HEADER_ACCEPT_VERSION = "Accept-Version"
@@ -193,15 +186,15 @@ class Api:
         for activity_json in response.json():
             action = activity_json.get("action")
 
-            if action in ["doorbell_call_missed", "doorbell_call_hangup"]:
+            if action in ACTIVITY_ACTIONS_DOORBELL_DING:
                 activities.append(DoorbellDingActivity(activity_json))
-            elif action == "doorbell_motion_detected":
+            elif action in ACTIVITY_ACTIONS_DOORBELL_MOTION:
                 activities.append(DoorbellMotionActivity(activity_json))
-            elif action == "doorbell_call_initiated":
+            elif action in ACTIVITY_ACTIONS_DOORBELL_VIEW:
                 activities.append(DoorbellViewActivity(activity_json))
-            elif action in ["lock", "unlock", "onetouchlock"]:
+            elif action in ACTIVITY_ACTIONS_LOCK_OPERATION:
                 activities.append(LockOperationActivity(activity_json))
-            elif action in ["doorclosed", "dooropen"]:
+            elif action in ACTIVITY_ACTIONS_DOOR_OPERATION:
                 activities.append(DoorOperationActivity(activity_json))
 
         return activities

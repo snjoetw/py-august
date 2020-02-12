@@ -1,8 +1,8 @@
 import unittest
-from datetime import datetime, timezone, timedelta
-from dateutil.tz import tzutc
+from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
+from dateutil.tz import tzutc
 from requests import RequestException
 
 from august.authenticator import (AuthenticationState, Authenticator,
