@@ -2,14 +2,13 @@ from enum import Enum
 
 from august.device import Device, DeviceDetail
 from august.keypad import KeypadDetail
+from august.bridge import BridgeDetail
 
 
 class Lock(Device):
     def __init__(self, device_id, data):
         super().__init__(
-            device_id,
-            data["LockName"],
-            data["HouseID"],
+            device_id, data["LockName"], data["HouseID"],
         )
         self._user_type = data["UserType"]
 
@@ -19,9 +18,8 @@ class Lock(Device):
 
     def __repr__(self):
         return "Lock(id={}, name={}, house_id={})".format(
-            self.device_id,
-            self.device_name,
-            self.house_id)
+            self.device_id, self.device_name, self.house_id
+        )
 
 
 class LockDetail(DeviceDetail):
@@ -31,10 +29,21 @@ class LockDetail(DeviceDetail):
             data["LockName"],
             data["HouseID"],
             data["SerialNumber"],
-            data["currentFirmwareVersion"])
+            data["currentFirmwareVersion"],
+        )
 
-        if 'keypad' in data:
-            self._keypad_detail = KeypadDetail(self.house_id, data['keypad'])
+        if "Bridge" in data:
+            self._bridge = BridgeDetail(self.house_id, self.device_id, data["Bridge"])
+        else:
+            self._bridge = None
+
+        self._doorsense = None
+        if "LockStatus" in data:
+            if "doorState" in data["LockStatus"]:
+                self._doorsense = True
+
+        if "keypad" in data:
+            self._keypad_detail = KeypadDetail(self.house_id, data["keypad"])
         else:
             self._keypad_detail = None
 
@@ -47,6 +56,14 @@ class LockDetail(DeviceDetail):
     @property
     def keypad(self):
         return self._keypad_detail
+
+    @property
+    def bridge(self):
+        return self._bridge
+
+    @property
+    def doorsense(self):
+        return self._doorsense
 
 
 class LockStatus(Enum):
