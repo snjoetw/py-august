@@ -44,6 +44,8 @@
     "signal_level": -56,
     "uptime": "16168.75 13830.49",
     "load_average": "0.50 0.47 0.35 1/154 9345",
+    "battery_soc": 96,
+    "battery_soh": 95,
     "temperature": 28.25,
     "steady_ac_in": 22.196405,
     "battery": 4.061763,

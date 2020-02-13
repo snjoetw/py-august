@@ -81,6 +81,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual("tBXZR0Z35E", doorbell.serial_number)
         self.assertEqual("2.3.0-RC153+201711151527", doorbell.firmware_version)
         self.assertEqual("doorbell_call_status_online", doorbell.status)
+        self.assertEqual(96, doorbell.battery_level)
         self.assertEqual(True, doorbell.is_online)
         self.assertEqual(True, doorbell.has_subscription)
         self.assertEqual(
