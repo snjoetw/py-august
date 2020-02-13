@@ -2,23 +2,15 @@ import os
 import unittest
 from datetime import datetime
 
-import requests_mock
-from dateutil.tz import tzutc
-
 import august.activity
-from august.api import (
-    API_GET_DOORBELL_URL,
-    API_GET_DOORBELLS_URL,
-    API_GET_HOUSE_ACTIVITIES_URL,
-    API_GET_LOCK_STATUS_URL,
-    API_GET_LOCK_URL,
-    API_GET_LOCKS_URL,
-    API_GET_PINS_URL,
-    API_LOCK_URL,
-    API_UNLOCK_URL,
-    Api,
-)
+import requests_mock
+from august.api import (API_GET_DOORBELL_URL, API_GET_DOORBELLS_URL,
+                        API_GET_HOUSE_ACTIVITIES_URL, API_GET_LOCK_STATUS_URL,
+                        API_GET_LOCK_URL, API_GET_LOCKS_URL, API_GET_PINS_URL,
+                        API_LOCK_URL, API_UNLOCK_URL, Api)
+from august.bridge import BridgeDetail, BridgeStatus, BridgeStatusDetail
 from august.lock import LockDoorStatus, LockStatus
+from dateutil.tz import tzutc
 
 ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9"
 
@@ -124,11 +116,35 @@ class TestApi(unittest.TestCase):
         self.assertEqual(True, first.is_operable)
 
     @requests_mock.Mocker()
-    def test_get_lock_detail(self, mock):
+    def test_get_lock_detail_with_doorsense_bridge_online(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_LOCK_URL.format(lock_id="ABC"),
+            text=load_fixture("get_lock.online_with_doorsense.json"),
+        )
+
+        api = Api()
+        lock = api.get_lock_detail(ACCESS_TOKEN, "ABC")
+
+        self.assertEqual("ABC", lock.device_id)
+        self.assertEqual("Online door with doorsense", lock.device_name)
+        self.assertEqual("123", lock.house_id)
+        self.assertEqual("XY", lock.serial_number)
+        self.assertEqual("undefined-4.3.0-1.8.14", lock.firmware_version)
+        self.assertEqual(92, lock.battery_level)
+        self.assertEqual(None, lock.keypad)
+        self.assertIsInstance(lock.bridge, BridgeDetail)
+        self.assertIsInstance(lock.bridge.status, BridgeStatusDetail)
+        self.assertEqual(BridgeStatus.ONLINE, lock.bridge.status.current)
+        self.assertEqual(True, lock.bridge.operative)
+        self.assertEqual(True, lock.doorsense)
+
+    @requests_mock.Mocker()
+    def test_get_lock_detail_bridge_online(self, mock):
         mock.register_uri(
             "get",
             API_GET_LOCK_URL.format(lock_id="A6697750D607098BAE8D6BAA11EF8063"),
-            text=load_fixture("get_lock.json"),
+            text=load_fixture("get_lock.online.json"),
         )
 
         api = Api()
@@ -142,6 +158,30 @@ class TestApi(unittest.TestCase):
         self.assertEqual(88, lock.battery_level)
         self.assertEqual("Medium", lock.keypad.battery_level)
         self.assertEqual("5bc65c24e6ef2a263e1450a8", lock.keypad.device_id)
+        self.assertIsInstance(lock.bridge, BridgeDetail)
+        self.assertEqual(True, lock.bridge.operative)
+        self.assertEqual(True, lock.doorsense)
+
+    @requests_mock.Mocker()
+    def test_get_lock_detail_bridge_offline(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_LOCK_URL.format(lock_id="ABC"),
+            text=load_fixture("get_lock.offline.json"),
+        )
+
+        api = Api()
+        lock = api.get_lock_detail(ACCESS_TOKEN, "ABC")
+
+        self.assertEqual("ABC", lock.device_id)
+        self.assertEqual("Test", lock.device_name)
+        self.assertEqual("houseid", lock.house_id)
+        self.assertEqual("ABC", lock.serial_number)
+        self.assertEqual("undefined-1.59.0-1.13.2", lock.firmware_version)
+        self.assertEqual(-100, lock.battery_level)
+        self.assertEqual(None, lock.keypad)
+        self.assertEqual(None, lock.bridge)
+        self.assertEqual(None, lock.doorsense)
 
     @requests_mock.Mocker()
     def test_get_lock_status_with_locked_response(self, mock):

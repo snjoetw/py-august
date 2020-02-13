@@ -1,8 +1,8 @@
 from enum import Enum
 
+from august.bridge import BridgeDetail
 from august.device import Device, DeviceDetail
 from august.keypad import KeypadDetail
-from august.bridge import BridgeDetail
 
 
 class Lock(Device):
