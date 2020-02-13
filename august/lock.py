@@ -33,7 +33,7 @@ class LockDetail(DeviceDetail):
         )
 
         if "Bridge" in data:
-            self._bridge = BridgeDetail(self.house_id, self.device_id, data["Bridge"])
+            self._bridge = BridgeDetail(self.house_id, data["Bridge"])
         else:
             self._bridge = None
 
