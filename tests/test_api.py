@@ -4,10 +4,18 @@ from datetime import datetime
 
 import august.activity
 import requests_mock
-from august.api import (API_GET_DOORBELL_URL, API_GET_DOORBELLS_URL,
-                        API_GET_HOUSE_ACTIVITIES_URL, API_GET_LOCK_STATUS_URL,
-                        API_GET_LOCK_URL, API_GET_LOCKS_URL, API_GET_PINS_URL,
-                        API_LOCK_URL, API_UNLOCK_URL, Api)
+from august.api import (
+    API_GET_DOORBELL_URL,
+    API_GET_DOORBELLS_URL,
+    API_GET_HOUSE_ACTIVITIES_URL,
+    API_GET_LOCK_STATUS_URL,
+    API_GET_LOCK_URL,
+    API_GET_LOCKS_URL,
+    API_GET_PINS_URL,
+    API_LOCK_URL,
+    API_UNLOCK_URL,
+    Api,
+)
 from august.bridge import BridgeDetail, BridgeStatus, BridgeStatusDetail
 from august.lock import LockDoorStatus, LockStatus
 from dateutil.tz import tzutc
@@ -181,7 +189,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(-100, lock.battery_level)
         self.assertEqual(None, lock.keypad)
         self.assertEqual(None, lock.bridge)
-        self.assertEqual(None, lock.doorsense)
+        self.assertEqual(False, lock.doorsense)
 
     @requests_mock.Mocker()
     def test_get_lock_status_with_locked_response(self, mock):
