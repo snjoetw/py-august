@@ -37,7 +37,7 @@ class LockDetail(DeviceDetail):
         else:
             self._bridge = None
 
-        self._doorsense = None
+        self._doorsense = False
         if "LockStatus" in data:
             if "doorState" in data["LockStatus"]:
                 self._doorsense = True
