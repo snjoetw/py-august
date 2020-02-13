@@ -4,6 +4,7 @@ august/__init__.py
 august/activity.py
 august/api.py
 august/authenticator.py
+august/bridge.py
 august/device.py
 august/doorbell.py
 august/keypad.py
