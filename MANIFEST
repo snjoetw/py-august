@@ -7,6 +7,7 @@ august/authenticator.py
 august/bridge.py
 august/device.py
 august/doorbell.py
+august/exceptions.py
 august/keypad.py
 august/lock.py
 august/pin.py

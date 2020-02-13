@@ -2,23 +2,21 @@ import os
 import unittest
 from datetime import datetime
 
-import august.activity
 import requests_mock
-from august.api import (
-    API_GET_DOORBELL_URL,
-    API_GET_DOORBELLS_URL,
-    API_GET_HOUSE_ACTIVITIES_URL,
-    API_GET_LOCK_STATUS_URL,
-    API_GET_LOCK_URL,
-    API_GET_LOCKS_URL,
-    API_GET_PINS_URL,
-    API_LOCK_URL,
-    API_UNLOCK_URL,
-    Api,
-)
-from august.bridge import BridgeDetail, BridgeStatus, BridgeStatusDetail
-from august.lock import LockDoorStatus, LockStatus
 from dateutil.tz import tzutc
+from requests.exceptions import HTTPError
+from requests.models import Response
+from requests.structures import CaseInsensitiveDict
+
+import august.activity
+from august.api import (API_GET_DOORBELL_URL, API_GET_DOORBELLS_URL,
+                        API_GET_HOUSE_ACTIVITIES_URL, API_GET_LOCK_STATUS_URL,
+                        API_GET_LOCK_URL, API_GET_LOCKS_URL, API_GET_PINS_URL,
+                        API_LOCK_URL, API_UNLOCK_URL, Api,
+                        _raise_response_exceptions)
+from august.bridge import BridgeDetail, BridgeStatus, BridgeStatusDetail
+from august.exceptions import AugustApiHTTPError
+from august.lock import LockDoorStatus, LockStatus
 
 ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9"
 
@@ -393,3 +391,55 @@ class TestApi(unittest.TestCase):
         self.assertIsInstance(activities[7], august.activity.DoorOperationActivity)
         self.assertIsInstance(activities[8], august.activity.LockOperationActivity)
         self.assertIsInstance(activities[9], august.activity.LockOperationActivity)
+
+    def test__raise_response_exceptions(self):
+        four_two_eight = MockedResponse(content="not json")
+        four_two_eight.status_code = 404
+        four_two_eight.url = "http://code404.tld"
+
+        try:
+            _raise_response_exceptions(four_two_eight)
+        except Exception as err:
+            self.assertIsInstance(err, HTTPError)
+            self.assertNotIsInstance(err, AugustApiHTTPError)
+
+        four_two_eight = MockedResponse(
+            content='{"code":97,"message":"four two eight"}'
+        )
+        four_two_eight.status_code = 428
+        four_two_eight.url = "http://code428.tld"
+        four_two_eight.headers = CaseInsensitiveDict(
+            {"Content-Type": "application/json"}
+        )
+
+        try:
+            _raise_response_exceptions(four_two_eight)
+        except AugustApiHTTPError as err:
+            self.assertEqual(str(err), "The operation failed because: four two eight")
+
+        ERROR_MAP = {
+            422: "The operation failed because the bridge (connect) is offline.",
+            423: "The operation failed because the bridge (connect) is in use.",
+            408: "The operation timed out because the bridge (connect) failed to respond.",
+        }
+
+        for status_code in ERROR_MAP:
+            mocked_response = MockedResponse(content="ignored")
+            mocked_response.status_code = status_code
+            mocked_response.url = "http://code"
+
+            try:
+                _raise_response_exceptions(mocked_response)
+            except AugustApiHTTPError as err:
+                self.assertEqual(str(err), ERROR_MAP[status_code])
+
+
+class MockedResponse(Response):
+    def __init__(self, *args, **kwargs):
+        content = kwargs.pop("content", None)
+        super(MockedResponse, self).__init__(*args, **kwargs)
+        self._mocked_content = content
+
+    @property
+    def content(self):
+        return self._mocked_content
