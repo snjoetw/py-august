@@ -39,7 +39,10 @@ class LockDetail(DeviceDetail):
 
         self._doorsense = False
         if "LockStatus" in data:
-            if "doorState" in data["LockStatus"]:
+            if (
+                "doorState" in data["LockStatus"]
+                and data["LockStatus"]["doorState"] != "init"
+            ):
                 self._doorsense = True
 
         if "keypad" in data:
