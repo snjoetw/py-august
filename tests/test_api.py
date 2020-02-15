@@ -193,6 +193,29 @@ class TestApi(unittest.TestCase):
         self.assertEqual(False, lock.doorsense)
 
     @requests_mock.Mocker()
+    def test_get_lock_detail_doorsense_init_state(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_LOCK_URL.format(lock_id="A6697750D607098BAE8D6BAA11EF8063"),
+            text=load_fixture("get_lock.doorsense_init.json"),
+        )
+
+        api = Api()
+        lock = api.get_lock_detail(ACCESS_TOKEN, "A6697750D607098BAE8D6BAA11EF8063")
+
+        self.assertEqual("A6697750D607098BAE8D6BAA11EF8063", lock.device_id)
+        self.assertEqual("Front Door Lock", lock.device_name)
+        self.assertEqual("000000000000", lock.house_id)
+        self.assertEqual("X2FSW05DGA", lock.serial_number)
+        self.assertEqual("109717e9-3.0.44-3.0.30", lock.firmware_version)
+        self.assertEqual(88, lock.battery_level)
+        self.assertEqual("Medium", lock.keypad.battery_level)
+        self.assertEqual("5bc65c24e6ef2a263e1450a8", lock.keypad.device_id)
+        self.assertIsInstance(lock.bridge, BridgeDetail)
+        self.assertEqual(True, lock.bridge.operative)
+        self.assertEqual(False, lock.doorsense)
+
+    @requests_mock.Mocker()
     def test_get_lock_status_with_locked_response(self, mock):
         lock_id = 1234
         mock.register_uri(
