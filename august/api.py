@@ -126,9 +126,7 @@ class Api:
 
         return response
 
-    def validate_verification_code(
-        self, access_token, login_method, username, verification_code
-    ):
+    def validate_verification_code(self, access_token, login_method, username, verification_code):
         response = self._call_api(
             "post",
             API_VALIDATE_VERIFICATION_CODE_URLS[login_method],
