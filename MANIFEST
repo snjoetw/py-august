@@ -11,3 +11,4 @@ august/exceptions.py
 august/keypad.py
 august/lock.py
 august/pin.py
+august/util.py
