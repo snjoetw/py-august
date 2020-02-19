@@ -8,6 +8,7 @@ import datetime
 from august.activity import DoorOperationActivity, LockOperationActivity
 from august.lock import LockDetail, LockDoorStatus, LockStatus
 from august.util import update_lock_detail_from_activity, as_utc_from_local
+from august.api import _convert_lock_result_to_activities
 
 
 def load_fixture(filename):
@@ -98,7 +99,20 @@ class TestLockDetail(unittest.TestCase):
                 lock, closed_operation_wrong_deviceid_activity
             )
 
-        with self.assertRaises(ValueError):
+        # We do not always have the houseid so we do not throw
+        # as long as the deviceid is correct since they are unique
+        self.assertFalse(
             update_lock_detail_from_activity(
                 lock, closed_operation_wrong_houseid_activity
             )
+        )
+
+        self.assertEqual(LockDoorStatus.OPEN, lock.door_state)
+        self.assertEqual(LockStatus.LOCKED, lock.lock_status)
+        activities = _convert_lock_result_to_activities(
+            json.loads(load_fixture("unlock.json"))
+        )
+        for activity in activities:
+            self.assertTrue(update_lock_detail_from_activity(lock, activity))
+        self.assertEqual(LockDoorStatus.CLOSED, lock.door_state)
+        self.assertEqual(LockStatus.UNLOCKED, lock.lock_status)

@@ -2,6 +2,7 @@ import json
 import logging
 import time
 
+import dateutil.parser
 from requests import Session, request
 from requests.exceptions import HTTPError
 
@@ -22,8 +23,10 @@ from august.exceptions import AugustApiHTTPError
 from august.lock import (
     Lock,
     LockDetail,
-    determine_lock_status,
+    LockDoorStatus,
     determine_door_state,
+    determine_lock_status,
+    door_state_to_string,
 )
 from august.pin import Pin
 
@@ -168,18 +171,9 @@ class Api:
 
         activities = []
         for activity_json in response.json():
-            action = activity_json.get("action")
-
-            if action in ACTIVITY_ACTIONS_DOORBELL_DING:
-                activities.append(DoorbellDingActivity(activity_json))
-            elif action in ACTIVITY_ACTIONS_DOORBELL_MOTION:
-                activities.append(DoorbellMotionActivity(activity_json))
-            elif action in ACTIVITY_ACTIONS_DOORBELL_VIEW:
-                activities.append(DoorbellViewActivity(activity_json))
-            elif action in ACTIVITY_ACTIONS_LOCK_OPERATION:
-                activities.append(LockOperationActivity(activity_json))
-            elif action in ACTIVITY_ACTIONS_DOOR_OPERATION:
-                activities.append(DoorOperationActivity(activity_json))
+            activity = _activity_from_dict(activity_json)
+            if activity:
+                activities.append(activity)
 
         return activities
 
@@ -239,25 +233,57 @@ class Api:
 
         return [Pin(pin_json) for pin_json in json_dict.get("loaded", [])]
 
-    def lock(self, access_token, lock_id):
-        json_dict = self._call_api(
+    def _call_lock_operation(self, url_str, access_token, lock_id):
+        return self._call_api(
             "put",
-            API_LOCK_URL.format(lock_id=lock_id),
+            url_str.format(lock_id=lock_id),
             access_token=access_token,
             timeout=self._command_timeout,
         ).json()
 
+    def _lock(self, access_token, lock_id):
+        return self._call_lock_operation(API_LOCK_URL, access_token, lock_id)
+
+    def lock(self, access_token, lock_id):
+        """Execute a remote lock operation.
+
+        Returns a LockStatus state.
+        """
+        json_dict = self._lock(access_token, lock_id)
         return determine_lock_status(json_dict.get("status"))
+
+    def lock_return_activities(self, access_token, lock_id):
+        """Execute a remote lock operation.
+
+        Returns an array of one or more august.activity.Activity objects
+
+        If the lock supports door sense one of the activities
+        will include the current door state.
+        """
+        json_dict = self._lock(access_token, lock_id)
+        return _convert_lock_result_to_activities(json_dict)
+
+    def _unlock(self, access_token, lock_id):
+        return self._call_lock_operation(API_UNLOCK_URL, access_token, lock_id)
 
     def unlock(self, access_token, lock_id):
-        json_dict = self._call_api(
-            "put",
-            API_UNLOCK_URL.format(lock_id=lock_id),
-            access_token=access_token,
-            timeout=self._command_timeout,
-        ).json()
+        """Execute a remote unlock operation.
 
+        Returns a LockStatus state.
+        """
+        json_dict = self._unlock(access_token, lock_id)
         return determine_lock_status(json_dict.get("status"))
+
+    def unlock_return_activities(self, access_token, lock_id):
+        """Execute a remote lock operation.
+
+        Returns an array of one or more august.activity.Activity objects
+
+        If the lock supports door sense one of the activities
+        will include the current door state.
+        """
+        json_dict = self._unlock(access_token, lock_id)
+        return _convert_lock_result_to_activities(json_dict)
 
     def refresh_access_token(self, access_token):
         response = self._call_api("get", API_GET_HOUSES_URL, access_token=access_token)
@@ -335,3 +361,55 @@ def _raise_response_exceptions(response):
                 response=err.response,
             ) from err
         raise err
+
+
+def _convert_lock_result_to_activities(lock_json_dict):
+    activities = []
+    lock_info_json_dict = lock_json_dict.get("info", {})
+    lock_id = lock_info_json_dict.get("lockID")
+    lock_action_text = lock_info_json_dict.get("action")
+    activity_epoch = _datetime_string_to_epoch(lock_info_json_dict.get("startTime"))
+    activity_lock_dict = _map_lock_result_to_activity(
+        lock_id, activity_epoch, lock_action_text
+    )
+    activities.append(activity_lock_dict)
+
+    door_state = determine_door_state(lock_json_dict.get("doorState"))
+    if door_state != LockDoorStatus.UNKNOWN:
+        activity_door_dict = _map_lock_result_to_activity(
+            lock_id, activity_epoch, door_state_to_string(door_state)
+        )
+        activities.append(activity_door_dict)
+
+    return activities
+
+
+def _activity_from_dict(activity_dict):
+    action = activity_dict.get("action")
+
+    if action in ACTIVITY_ACTIONS_DOORBELL_DING:
+        return DoorbellDingActivity(activity_dict)
+    if action in ACTIVITY_ACTIONS_DOORBELL_MOTION:
+        return DoorbellMotionActivity(activity_dict)
+    if action in ACTIVITY_ACTIONS_DOORBELL_VIEW:
+        return DoorbellViewActivity(activity_dict)
+    if action in ACTIVITY_ACTIONS_LOCK_OPERATION:
+        return LockOperationActivity(activity_dict)
+    if action in ACTIVITY_ACTIONS_DOOR_OPERATION:
+        return DoorOperationActivity(activity_dict)
+    return None
+
+
+def _map_lock_result_to_activity(lock_id, activity_epoch, action_text):
+    """Create an august activity from a lock result."""
+    mapped_dict = {
+        "dateTime": activity_epoch,
+        "deviceID": lock_id,
+        "deviceType": "lock",
+        "action": action_text,
+    }
+    return _activity_from_dict(mapped_dict)
+
+
+def _datetime_string_to_epoch(datetime_string):
+    return dateutil.parser.parse(datetime_string).timestamp() * 1000
