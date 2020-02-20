@@ -4,7 +4,7 @@ from datetime import datetime
 
 import requests_mock
 import dateutil.parser
-from dateutil.tz import tzutc
+from dateutil.tz import tzutc, tzlocal
 from requests.exceptions import HTTPError
 from requests.models import Response
 from requests.structures import CaseInsensitiveDict
@@ -90,10 +90,39 @@ class TestApi(unittest.TestCase):
         self.assertEqual("doorbell_call_status_online", doorbell.status)
         self.assertEqual(96, doorbell.battery_level)
         self.assertEqual(True, doorbell.is_online)
+        self.assertEqual(False, doorbell.is_standby)
+        self.assertEqual(
+            dateutil.parser.parse("2017-12-10T08:01:35Z"),
+            doorbell.image_created_at_datetime,
+        )
         self.assertEqual(True, doorbell.has_subscription)
         self.assertEqual(
             "https://image.com/vmk16naaaa7ibuey7sar.jpg", doorbell.image_url
         )
+
+    @requests_mock.Mocker()
+    def test_get_doorbell_detail_missing_image(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_DOORBELL_URL.format(doorbell_id="K98GiDT45GUL"),
+            text=load_fixture("get_doorbell_missing_image.json"),
+        )
+
+        api = Api()
+        doorbell = api.get_doorbell_detail(ACCESS_TOKEN, "K98GiDT45GUL")
+
+        self.assertEqual("K98GiDT45GUL", doorbell.device_id)
+        self.assertEqual("Front Door", doorbell.device_name)
+        self.assertEqual("3dd2accaea08", doorbell.house_id)
+        self.assertEqual("tBXZR0Z35E", doorbell.serial_number)
+        self.assertEqual("2.3.0-RC153+201711151527", doorbell.firmware_version)
+        self.assertEqual("doorbell_call_status_online", doorbell.status)
+        self.assertEqual(96, doorbell.battery_level)
+        self.assertEqual(True, doorbell.is_online)
+        self.assertEqual(False, doorbell.is_standby)
+        self.assertEqual(None, doorbell.image_created_at_datetime)
+        self.assertEqual(True, doorbell.has_subscription)
+        self.assertEqual(None, doorbell.image_url)
 
     @requests_mock.Mocker()
     def test_get_locks(self, mock):
@@ -420,8 +449,10 @@ class TestApi(unittest.TestCase):
 
         api = Api()
         activities = api.lock_return_activities(ACCESS_TOKEN, lock_id)
-        expected_lock_dt = dateutil.parser.parse("2020-02-19T19:44:54.371Z").replace(
-            tzinfo=None
+        expected_lock_dt = (
+            dateutil.parser.parse("2020-02-19T19:44:54.371Z")
+            .astimezone(tz=tzlocal())
+            .replace(tzinfo=None)
         )
 
         self.assertEqual(len(activities), 2)
@@ -449,8 +480,10 @@ class TestApi(unittest.TestCase):
 
         api = Api()
         activities = api.unlock_return_activities(ACCESS_TOKEN, lock_id)
-        expected_unlock_dt = dateutil.parser.parse("2020-02-19T19:44:26.745Z").replace(
-            tzinfo=None
+        expected_unlock_dt = (
+            dateutil.parser.parse("2020-02-19T19:44:26.745Z")
+            .astimezone(tz=tzlocal())
+            .replace(tzinfo=None)
         )
 
         self.assertEqual(len(activities), 2)
@@ -478,8 +511,10 @@ class TestApi(unittest.TestCase):
 
         api = Api()
         activities = api.lock_return_activities(ACCESS_TOKEN, lock_id)
-        expected_lock_dt = dateutil.parser.parse("2020-02-19T19:44:54.371Z").replace(
-            tzinfo=None
+        expected_lock_dt = (
+            dateutil.parser.parse("2020-02-19T19:44:54.371Z")
+            .astimezone(tz=tzlocal())
+            .replace(tzinfo=None)
         )
 
         self.assertEqual(len(activities), 1)
@@ -501,8 +536,10 @@ class TestApi(unittest.TestCase):
 
         api = Api()
         activities = api.unlock_return_activities(ACCESS_TOKEN, lock_id)
-        expected_unlock_dt = dateutil.parser.parse("2020-02-19T19:44:26.745Z").replace(
-            tzinfo=None
+        expected_unlock_dt = (
+            dateutil.parser.parse("2020-02-19T19:44:26.745Z")
+            .astimezone(tz=tzlocal())
+            .replace(tzinfo=None)
         )
 
         self.assertEqual(len(activities), 1)

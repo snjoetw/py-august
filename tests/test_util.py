@@ -5,9 +5,18 @@ import unittest
 import dateutil.parser
 import datetime
 
-from august.activity import DoorOperationActivity, LockOperationActivity
+from august.activity import (
+    DoorOperationActivity,
+    LockOperationActivity,
+    DoorbellMotionActivity,
+)
 from august.lock import LockDetail, LockDoorStatus, LockStatus
-from august.util import update_lock_detail_from_activity, as_utc_from_local
+from august.doorbell import DoorbellDetail
+from august.util import (
+    update_lock_detail_from_activity,
+    as_utc_from_local,
+    update_doorbell_image_from_activity,
+)
 from august.api import _convert_lock_result_to_activities
 
 
@@ -116,3 +125,84 @@ class TestLockDetail(unittest.TestCase):
             self.assertTrue(update_lock_detail_from_activity(lock, activity))
         self.assertEqual(LockDoorStatus.CLOSED, lock.door_state)
         self.assertEqual(LockStatus.UNLOCKED, lock.lock_status)
+
+
+class TestDetail(unittest.TestCase):
+    def test_update_doorbell_image_from_activity(self):
+        doorbell = DoorbellDetail(json.loads(load_fixture("get_doorbell.json")))
+        self.assertEqual("K98GiDT45GUL", doorbell.device_id)
+        self.assertEqual(
+            dateutil.parser.parse("2017-12-10T08:01:35Z"),
+            doorbell.image_created_at_datetime,
+        )
+        self.assertEqual(
+            "https://image.com/vmk16naaaa7ibuey7sar.jpg", doorbell.image_url
+        )
+        doorbell_motion_activity_no_image = DoorbellMotionActivity(
+            json.loads(load_fixture("doorbell_motion_activity_no_image.json"))
+        )
+        self.assertFalse(
+            update_doorbell_image_from_activity(
+                doorbell, doorbell_motion_activity_no_image
+            )
+        )
+        doorbell_motion_activity = DoorbellMotionActivity(
+            json.loads(load_fixture("doorbell_motion_activity.json"))
+        )
+        self.assertTrue(
+            update_doorbell_image_from_activity(doorbell, doorbell_motion_activity)
+        )
+        self.assertEqual(
+            dateutil.parser.parse("2020-02-20T17:44:45Z"),
+            doorbell.image_created_at_datetime,
+        )
+        self.assertEqual("https://my.updated.image/image.jpg", doorbell.image_url)
+        old_doorbell_motion_activity = DoorbellMotionActivity(
+            json.loads(load_fixture("doorbell_motion_activity_old.json"))
+        )
+        # returns false we send an older activity
+        self.assertFalse(
+            update_doorbell_image_from_activity(doorbell, old_doorbell_motion_activity)
+        )
+        self.assertEqual(
+            dateutil.parser.parse("2020-02-20T17:44:45Z"),
+            doorbell.image_created_at_datetime,
+        )
+        self.assertEqual("https://my.updated.image/image.jpg", doorbell.image_url)
+        wrong_doorbell_motion_activity = DoorbellMotionActivity(
+            json.loads(load_fixture("doorbell_motion_activity_wrong.json"))
+        )
+
+        with self.assertRaises(ValueError):
+            update_doorbell_image_from_activity(
+                doorbell, wrong_doorbell_motion_activity
+            )
+
+    def test_update_doorbell_image_from_activity_missing_image_at_start(self):
+        doorbell = DoorbellDetail(
+            json.loads(load_fixture("get_doorbell_missing_image.json"))
+        )
+        self.assertEqual("K98GiDT45GUL", doorbell.device_id)
+        self.assertEqual(
+            None, doorbell.image_created_at_datetime,
+        )
+        self.assertEqual(None, doorbell.image_url)
+        doorbell_motion_activity_no_image = DoorbellMotionActivity(
+            json.loads(load_fixture("doorbell_motion_activity_no_image.json"))
+        )
+        self.assertFalse(
+            update_doorbell_image_from_activity(
+                doorbell, doorbell_motion_activity_no_image
+            )
+        )
+        doorbell_motion_activity = DoorbellMotionActivity(
+            json.loads(load_fixture("doorbell_motion_activity.json"))
+        )
+        self.assertTrue(
+            update_doorbell_image_from_activity(doorbell, doorbell_motion_activity)
+        )
+        self.assertEqual(
+            dateutil.parser.parse("2020-02-20T17:44:45Z"),
+            doorbell.image_created_at_datetime,
+        )
+        self.assertEqual("https://my.updated.image/image.jpg", doorbell.image_url)
