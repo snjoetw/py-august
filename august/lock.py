@@ -1,8 +1,16 @@
 from enum import Enum
 
+import datetime
+import dateutil.parser
+
 from august.bridge import BridgeDetail
 from august.device import Device, DeviceDetail
 from august.keypad import KeypadDetail
+
+LOCKED_STATUS = ("locked", "kAugLockState_Locked")
+UNLOCKED_STATUS = ("unlocked", "kAugLockState_Unlocked")
+CLOSED_STATUS = ("closed", "kAugLockDoorState_Closed")
+OPEN_STATUS = ("open", "kAugLockDoorState_Open")
 
 
 class Lock(Device):
@@ -38,11 +46,24 @@ class LockDetail(DeviceDetail):
             self._bridge = None
 
         self._doorsense = False
+        self._lock_status = LockStatus.UNKNOWN
+        self._door_state = LockDoorStatus.UNKNOWN
+        self._lock_status_datetime = None
+        self._door_state_datetime = None
+
         if "LockStatus" in data:
-            if (
-                    "doorState" in data["LockStatus"]
-                    and data["LockStatus"]["doorState"] != "init"
-            ):
+            lock_status = data["LockStatus"]
+
+            self._lock_status = determine_lock_status(lock_status.get("status"))
+            self._door_state = determine_door_state(lock_status.get("doorState"))
+
+            if "dateTime" in lock_status:
+                self._lock_status_datetime = dateutil.parser.parse(
+                    lock_status["dateTime"]
+                )
+                self._door_state_datetime = self._lock_status_datetime
+
+            if "doorState" in lock_status and lock_status["doorState"] != "init":
                 self._doorsense = True
 
         if "keypad" in data:
@@ -68,6 +89,50 @@ class LockDetail(DeviceDetail):
     def doorsense(self):
         return self._doorsense
 
+    @property
+    def lock_status(self):
+        return self._lock_status
+
+    @lock_status.setter
+    def lock_status(self, var):
+        """Update the lock status (usually form the activity log)."""
+        if var not in LockStatus:
+            raise ValueError
+        self._lock_status = var
+
+    @property
+    def lock_status_datetime(self):
+        return self._lock_status_datetime
+
+    @lock_status_datetime.setter
+    def lock_status_datetime(self, var):
+        """Update the lock status datetime (usually form the activity log)."""
+        if not isinstance(var, datetime.date):
+            raise ValueError
+        self._lock_status_datetime = var
+
+    @property
+    def door_state(self):
+        return self._door_state
+
+    @door_state.setter
+    def door_state(self, var):
+        """Update the door state (usually form the activity log)."""
+        if var not in LockDoorStatus:
+            raise ValueError
+        self._door_state = var
+
+    @property
+    def door_state_datetime(self):
+        return self._door_state_datetime
+
+    @door_state_datetime.setter
+    def door_state_datetime(self, var):
+        """Update the door state datetime (usually form the activity log)."""
+        if not isinstance(var, datetime.date):
+            raise ValueError
+        self._door_state_datetime = var
+
 
 class LockStatus(Enum):
     LOCKED = "locked"
@@ -79,3 +144,19 @@ class LockDoorStatus(Enum):
     CLOSED = "closed"
     OPEN = "open"
     UNKNOWN = "unknown"
+
+
+def determine_lock_status(status):
+    if status in LOCKED_STATUS:
+        return LockStatus.LOCKED
+    if status in UNLOCKED_STATUS:
+        return LockStatus.UNLOCKED
+    return LockStatus.UNKNOWN
+
+
+def determine_door_state(status):
+    if status in CLOSED_STATUS:
+        return LockDoorStatus.CLOSED
+    if status in OPEN_STATUS:
+        return LockDoorStatus.OPEN
+    return LockDoorStatus.UNKNOWN

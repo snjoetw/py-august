@@ -3,17 +3,26 @@ import unittest
 from datetime import datetime
 
 import requests_mock
+import dateutil.parser
 from dateutil.tz import tzutc
 from requests.exceptions import HTTPError
 from requests.models import Response
 from requests.structures import CaseInsensitiveDict
 
 import august.activity
-from august.api import (API_GET_DOORBELL_URL, API_GET_DOORBELLS_URL,
-                        API_GET_HOUSE_ACTIVITIES_URL, API_GET_LOCK_STATUS_URL,
-                        API_GET_LOCK_URL, API_GET_LOCKS_URL, API_GET_PINS_URL,
-                        API_LOCK_URL, API_UNLOCK_URL, Api,
-                        _raise_response_exceptions)
+from august.api import (
+    API_GET_DOORBELL_URL,
+    API_GET_DOORBELLS_URL,
+    API_GET_HOUSE_ACTIVITIES_URL,
+    API_GET_LOCK_STATUS_URL,
+    API_GET_LOCK_URL,
+    API_GET_LOCKS_URL,
+    API_GET_PINS_URL,
+    API_LOCK_URL,
+    API_UNLOCK_URL,
+    Api,
+    _raise_response_exceptions,
+)
 from august.bridge import BridgeDetail, BridgeStatus, BridgeStatusDetail
 from august.exceptions import AugustApiHTTPError
 from august.lock import LockDoorStatus, LockStatus
@@ -146,6 +155,15 @@ class TestApi(unittest.TestCase):
         self.assertEqual(True, lock.bridge.operative)
         self.assertEqual(True, lock.doorsense)
 
+        self.assertEqual(LockStatus.LOCKED, lock.lock_status)
+        self.assertEqual(LockDoorStatus.OPEN, lock.door_state)
+        self.assertEqual(
+            dateutil.parser.parse("2017-12-10T04:48:30.272Z"), lock.lock_status_datetime
+        )
+        self.assertEqual(
+            dateutil.parser.parse("2017-12-10T04:48:30.272Z"), lock.door_state_datetime
+        )
+
     @requests_mock.Mocker()
     def test_get_lock_detail_bridge_online(self, mock):
         mock.register_uri(
@@ -169,6 +187,15 @@ class TestApi(unittest.TestCase):
         self.assertEqual(True, lock.bridge.operative)
         self.assertEqual(True, lock.doorsense)
 
+        self.assertEqual(LockStatus.LOCKED, lock.lock_status)
+        self.assertEqual(LockDoorStatus.CLOSED, lock.door_state)
+        self.assertEqual(
+            dateutil.parser.parse("2017-12-10T04:48:30.272Z"), lock.lock_status_datetime
+        )
+        self.assertEqual(
+            dateutil.parser.parse("2017-12-10T04:48:30.272Z"), lock.door_state_datetime
+        )
+
     @requests_mock.Mocker()
     def test_get_lock_detail_bridge_offline(self, mock):
         mock.register_uri(
@@ -189,6 +216,11 @@ class TestApi(unittest.TestCase):
         self.assertEqual(None, lock.keypad)
         self.assertEqual(None, lock.bridge)
         self.assertEqual(False, lock.doorsense)
+
+        self.assertEqual(LockStatus.UNKNOWN, lock.lock_status)
+        self.assertEqual(LockDoorStatus.UNKNOWN, lock.door_state)
+        self.assertEqual(None, lock.lock_status_datetime)
+        self.assertEqual(None, lock.door_state_datetime)
 
     @requests_mock.Mocker()
     def test_get_lock_detail_doorsense_init_state(self, mock):
@@ -212,6 +244,30 @@ class TestApi(unittest.TestCase):
         self.assertIsInstance(lock.bridge, BridgeDetail)
         self.assertEqual(True, lock.bridge.operative)
         self.assertEqual(False, lock.doorsense)
+
+        self.assertEqual(LockStatus.LOCKED, lock.lock_status)
+        self.assertEqual(LockDoorStatus.UNKNOWN, lock.door_state)
+        self.assertEqual(
+            dateutil.parser.parse("2017-12-10T04:48:30.272Z"), lock.lock_status_datetime
+        )
+        self.assertEqual(
+            dateutil.parser.parse("2017-12-10T04:48:30.272Z"), lock.door_state_datetime
+        )
+
+        lock.lock_status = LockStatus.UNLOCKED
+        self.assertEqual(LockStatus.UNLOCKED, lock.lock_status)
+
+        lock.door_state = LockDoorStatus.OPEN
+        self.assertEqual(LockDoorStatus.OPEN, lock.door_state)
+
+        lock.lock_status_datetime = dateutil.parser.parse("2020-12-10T04:48:30.272Z")
+        self.assertEqual(
+            dateutil.parser.parse("2020-12-10T04:48:30.272Z"), lock.lock_status_datetime
+        )
+        lock.door_state_datetime = dateutil.parser.parse("2019-12-10T04:48:30.272Z")
+        self.assertEqual(
+            dateutil.parser.parse("2019-12-10T04:48:30.272Z"), lock.door_state_datetime
+        )
 
     @requests_mock.Mocker()
     def test_get_lock_status_with_locked_response(self, mock):

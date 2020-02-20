@@ -19,7 +19,12 @@ from august.activity import (
 )
 from august.doorbell import Doorbell, DoorbellDetail
 from august.exceptions import AugustApiHTTPError
-from august.lock import Lock, LockDetail, LockDoorStatus, LockStatus
+from august.lock import (
+    Lock,
+    LockDetail,
+    determine_lock_status,
+    determine_door_state,
+)
 from august.pin import Pin
 
 HEADER_ACCEPT_VERSION = "Accept-Version"
@@ -73,28 +78,6 @@ def _api_headers(access_token=None):
         headers[HEADER_AUGUST_ACCESS_TOKEN] = access_token
 
     return headers
-
-
-LOCKED_STATUS = ("locked", "kAugLockState_Locked")
-UNLOCKED_STATUS = ("unlocked", "kAugLockState_Unlocked")
-CLOSED_STATUS = ("closed", "kAugLockDoorState_Closed")
-OPEN_STATUS = ("open", "kAugLockDoorState_Open")
-
-
-def _determine_lock_status(status):
-    if status in LOCKED_STATUS:
-        return LockStatus.LOCKED
-    if status in UNLOCKED_STATUS:
-        return LockStatus.UNLOCKED
-    return LockStatus.UNKNOWN
-
-
-def _determine_lock_door_status(status):
-    if status in CLOSED_STATUS:
-        return LockDoorStatus.CLOSED
-    if status in OPEN_STATUS:
-        return LockDoorStatus.OPEN
-    return LockDoorStatus.UNKNOWN
 
 
 class Api:
@@ -228,11 +211,11 @@ class Api:
 
         if door_status:
             return (
-                _determine_lock_status(json_dict.get("status")),
-                _determine_lock_door_status(json_dict.get("doorState")),
+                determine_lock_status(json_dict.get("status")),
+                determine_door_state(json_dict.get("doorState")),
             )
 
-        return _determine_lock_status(json_dict.get("status"))
+        return determine_lock_status(json_dict.get("status"))
 
     def get_lock_door_status(self, access_token, lock_id, lock_status=False):
         json_dict = self._call_api(
@@ -243,11 +226,11 @@ class Api:
 
         if lock_status:
             return (
-                _determine_lock_door_status(json_dict.get("doorState")),
-                _determine_lock_status(json_dict.get("status")),
+                determine_door_state(json_dict.get("doorState")),
+                determine_lock_status(json_dict.get("status")),
             )
 
-        return _determine_lock_door_status(json_dict.get("doorState"))
+        return determine_door_state(json_dict.get("doorState"))
 
     def get_pins(self, access_token, lock_id):
         json_dict = self._call_api(
@@ -264,7 +247,7 @@ class Api:
             timeout=self._command_timeout,
         ).json()
 
-        return _determine_lock_status(json_dict.get("status"))
+        return determine_lock_status(json_dict.get("status"))
 
     def unlock(self, access_token, lock_id):
         json_dict = self._call_api(
@@ -274,7 +257,7 @@ class Api:
             timeout=self._command_timeout,
         ).json()
 
-        return _determine_lock_status(json_dict.get("status"))
+        return determine_lock_status(json_dict.get("status"))
 
     def refresh_access_token(self, access_token):
         response = self._call_api("get", API_GET_HOUSES_URL, access_token=access_token)

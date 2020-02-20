@@ -20,7 +20,7 @@
    "LockID" : "ABC",
    "LockName" : "Online door with doorsense",
    "LockStatus" : {
-      "dateTime" : "2000-00-00T00:00:00.447Z",
+      "dateTime" : "2017-12-10T04:48:30.272Z",
       "doorState" : "open",
       "isLockStatusChanged" : false,
       "status" : "locked",
