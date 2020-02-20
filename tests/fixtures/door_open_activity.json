@@ -1,0 +1,35 @@
+{
+  "action" : "dooropen",
+  "callingUser" : {
+     "FirstName" : "Unknown",
+     "LastName" : "User",
+     "PhoneNo" : "deleted",
+     "UserID" : "deleted",
+     "UserName" : "deleteduser"
+  },
+  "dateTime" : 1582007219000,
+  "deviceID" : "ABC",
+  "deviceName" : "MockHouse Tech Room Door",
+  "deviceType" : "lock",
+  "entities" : {
+     "activity" : "ActivityId",
+     "callingUser" : "deleted",
+     "device" : "ABC",
+     "house" : "123",
+     "otherUser" : "deleted"
+  },
+  "house" : {
+     "houseID" : "123",
+     "houseName" : "MockHouse"
+  },
+  "info" : {
+     "DateLogActionID" : "ABC+Time"
+  },
+  "otherUser" : {
+     "FirstName" : "Unknown",
+     "LastName" : "User",
+     "PhoneNo" : "deleted",
+     "UserID" : "deleted",
+     "UserName" : "deleteduser"
+  }
+}

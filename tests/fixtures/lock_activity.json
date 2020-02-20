@@ -1,0 +1,35 @@
+ {
+    "action" : "lock",
+    "callingUser" : {
+       "FirstName" : "MockHouse",
+       "LastName" : "House",
+       "UserID" : "mockUserId2"
+    },
+    "dateTime" : 1582007218000,
+    "deviceID" : "ABC",
+    "deviceName" : "MockHouseTDoor",
+    "deviceType" : "lock",
+    "entities" : {
+       "activity" : "mockActivity2",
+       "callingUser" : "mockUserId2",
+       "device" : "ABC",
+       "house" : "123",
+       "otherUser" : "deleted"
+    },
+    "house" : {
+       "houseID" : "123",
+       "houseName" : "MockHouse"
+    },
+    "info" : {
+       "DateLogActionID" : "ABC+Time",
+       "remote" : true
+    },
+    "otherUser" : {
+       "FirstName" : "Unknown",
+       "LastName" : "User",
+       "PhoneNo" : "deleted",
+       "UserID" : "deleted",
+       "UserName" : "deleteduser"
+    }
+ }
+
