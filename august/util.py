@@ -10,8 +10,6 @@ from august.activity import (
 def update_lock_detail_from_activity(lock_detail, activity):
     """Update the LockDetail from an activity."""
     activity_end_time_utc = as_utc_from_local(activity.activity_end_time)
-    if activity.house_id != lock_detail.house_id:
-        raise ValueError
     if activity.device_id != lock_detail.device_id:
         raise ValueError
     if isinstance(activity, LockOperationActivity):

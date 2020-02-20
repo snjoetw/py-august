@@ -1,0 +1,26 @@
+{
+   "resultsFromOperationCache" : false,
+   "retryCount" : 1,
+   "info" : {
+      "lockType" : "lock_version_3",
+      "lockID" : "ABC123",
+      "lockStatusChanged" : true,
+      "rssi" : -87,
+      "wlanRSSI" : -42,
+      "context" : {
+         "startDate" : "2020-02-19T19:44:54.370Z",
+         "transactionID" : "transid",
+         "retryCount" : 1
+      },
+      "serialNumber" : "serial",
+      "action" : "lock",
+      "wlanSNR" : 56,
+      "duration" : 3119,
+      "startTime" : "2020-02-19T19:44:54.371Z",
+      "serial" : "serial",
+      "bridgeID" : "brdigeid"
+   },
+   "doorState" : "kAugDoorState_Closed",
+   "status" : "kAugLockState_Locked",
+   "totalTime" : 3133
+}
