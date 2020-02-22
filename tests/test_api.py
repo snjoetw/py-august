@@ -73,10 +73,14 @@ class TestApi(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_doorbell_detail(self, mock):
+        expected_doorbell_image_url = "https://image.com/vmk16naaaa7ibuey7sar.jpg"
         mock.register_uri(
             "get",
             API_GET_DOORBELL_URL.format(doorbell_id="K98GiDT45GUL"),
             text=load_fixture("get_doorbell.json"),
+        )
+        mock.register_uri(
+            "get", expected_doorbell_image_url, text="doorbell_image_mocked"
         )
 
         api = Api()
@@ -96,8 +100,10 @@ class TestApi(unittest.TestCase):
             doorbell.image_created_at_datetime,
         )
         self.assertEqual(True, doorbell.has_subscription)
+        self.assertEqual(expected_doorbell_image_url, doorbell.image_url)
+        self.assertEqual(doorbell.get_doorbell_image(), b"doorbell_image_mocked")
         self.assertEqual(
-            "https://image.com/vmk16naaaa7ibuey7sar.jpg", doorbell.image_url
+            doorbell.get_doorbell_image(timeout=50), b"doorbell_image_mocked"
         )
 
     @requests_mock.Mocker()
