@@ -50,6 +50,7 @@ class LockDetail(DeviceDetail):
         self._door_state = LockDoorStatus.UNKNOWN
         self._lock_status_datetime = None
         self._door_state_datetime = None
+        self._model = None
 
         if "LockStatus" in data:
             lock_status = data["LockStatus"]
@@ -67,11 +68,19 @@ class LockDetail(DeviceDetail):
                 self._doorsense = True
 
         if "keypad" in data:
-            self._keypad_detail = KeypadDetail(self.house_id, data["keypad"])
+            keypad_name = data["LockName"] + " Keypad"
+            self._keypad_detail = KeypadDetail(self.house_id, keypad_name, data["keypad"])
         else:
             self._keypad_detail = None
 
         self._battery_level = int(100 * data["battery"])
+
+        if "skuNumber" in data:
+            self._model = data["skuNumber"]
+
+    @property
+    def model(self):
+        return self._model
 
     @property
     def battery_level(self):

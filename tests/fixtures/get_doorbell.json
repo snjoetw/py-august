@@ -4,6 +4,7 @@
   "appID": "august-iphone",
   "installUserID": "c3b2a94e-373e-aaaa-bbbb-36e996827777",
   "name": "Front Door",
+  "type": "gen1",
   "installDate": "2016-11-26T22:27:11.176Z",
   "pubsubChannel": "7c7a6672-59c8-3333-ffff-dcd98705cccc",
   "settings": {
