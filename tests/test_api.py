@@ -187,6 +187,7 @@ class TestApi(unittest.TestCase):
         self.assertIsInstance(lock.bridge, BridgeDetail)
         self.assertIsInstance(lock.bridge.status, BridgeStatusDetail)
         self.assertEqual(BridgeStatus.ONLINE, lock.bridge.status.current)
+        self.assertEqual(True, lock.bridge_is_online)
         self.assertEqual(True, lock.bridge.operative)
         self.assertEqual(True, lock.doorsense)
 
@@ -219,6 +220,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual("Medium", lock.keypad.battery_level)
         self.assertEqual("5bc65c24e6ef2a263e1450a8", lock.keypad.device_id)
         self.assertIsInstance(lock.bridge, BridgeDetail)
+        self.assertEqual(True, lock.bridge_is_online)
         self.assertEqual(True, lock.bridge.operative)
         self.assertEqual(True, lock.doorsense)
 
@@ -248,6 +250,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual("ABC", lock.serial_number)
         self.assertEqual("undefined-1.59.0-1.13.2", lock.firmware_version)
         self.assertEqual(-100, lock.battery_level)
+        self.assertEqual(False, lock.bridge_is_online)
         self.assertEqual(None, lock.keypad)
         self.assertEqual(None, lock.bridge)
         self.assertEqual(False, lock.doorsense)
@@ -277,6 +280,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual("Medium", lock.keypad.battery_level)
         self.assertEqual("5bc65c24e6ef2a263e1450a8", lock.keypad.device_id)
         self.assertIsInstance(lock.bridge, BridgeDetail)
+        self.assertEqual(True, lock.bridge_is_online)
         self.assertEqual(True, lock.bridge.operative)
         self.assertEqual(False, lock.doorsense)
 
