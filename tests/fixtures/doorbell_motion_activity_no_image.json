@@ -1,0 +1,38 @@
+{
+   "action" : "doorbell_motion_detected",
+   "callingUser" : {
+      "FirstName" : "Unknown",
+      "LastName" : "User",
+      "PhoneNo" : "deleted",
+      "UserID" : "deleted",
+      "UserName" : "deleteduser"
+   },
+   "dateTime" : 1582220686158,
+   "deviceID" : "K98GiDT45GUL",
+   "deviceName" : "Front Door",
+   "deviceType" : "doorbell",
+   "entities" : {
+      "activity" : "any",
+      "callingUser" : "deleted",
+      "device" : "K98GiDT45GUL",
+      "house" : "any",
+      "otherUser" : "deleted"
+   },
+   "house" : {
+      "houseID" : "any",
+      "houseName" : "any"
+   },
+   "info" : {
+      "dvrID" : "any",
+      "hasSubscription" : false,
+      "videoAvailable" : true,
+      "videoUploadProgress" : "complete"
+   },
+   "otherUser" : {
+      "FirstName" : "Unknown",
+      "LastName" : "User",
+      "PhoneNo" : "deleted",
+      "UserID" : "deleted",
+      "UserName" : "deleteduser"
+   }
+}

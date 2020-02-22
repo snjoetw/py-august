@@ -1,0 +1,56 @@
+{
+   "action" : "doorbell_motion_detected",
+   "callingUser" : {
+      "FirstName" : "Unknown",
+      "LastName" : "User",
+      "PhoneNo" : "deleted",
+      "UserID" : "deleted",
+      "UserName" : "deleteduser"
+   },
+   "dateTime" : 1482220686158,
+   "deviceID" : "K98GiDT45GUL",
+   "deviceName" : "Front Door",
+   "deviceType" : "doorbell",
+   "entities" : {
+      "activity" : "any",
+      "callingUser" : "deleted",
+      "device" : "K98GiDT45GUL",
+      "house" : "any",
+      "otherUser" : "deleted"
+   },
+   "house" : {
+      "houseID" : "any",
+      "houseName" : "any"
+   },
+   "info" : {
+      "dvrID" : "any",
+      "hasSubscription" : false,
+      "image" : {
+         "bytes" : 42865,
+         "created_at" : "2020-02-20T17:44:45Z",
+         "etag" : "andy",
+         "format" : "jpg",
+         "height" : 576,
+         "original_filename" : "file",
+         "placeholder" : false,
+         "public_id" : "any",
+         "resource_type" : "image",
+         "secure_url" : "https://this.is.the.old.url/should_not_take.jpg",
+         "signature" : "abc",
+         "tags" : [],
+         "type" : "upload",
+         "url" : "http://this.is.the.old.url/should_not_take.jpg",
+         "version" : 1482220685,
+         "width" : 720
+      },
+      "videoAvailable" : true,
+      "videoUploadProgress" : "complete"
+   },
+   "otherUser" : {
+      "FirstName" : "Unknown",
+      "LastName" : "User",
+      "PhoneNo" : "deleted",
+      "UserID" : "deleted",
+      "UserName" : "deleteduser"
+   }
+}
