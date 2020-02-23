@@ -132,6 +132,31 @@ class TestApi(unittest.TestCase):
         self.assertEqual(None, doorbell.image_url)
 
     @requests_mock.Mocker()
+    def test_get_doorbell_offline(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_DOORBELL_URL.format(doorbell_id="231ee2168dd0"),
+            text=load_fixture("get_doorbell.offline.json"),
+        )
+
+        api = Api()
+        doorbell = api.get_doorbell_detail(ACCESS_TOKEN, "231ee2168dd0")
+
+        self.assertEqual("231ee2168dd0", doorbell.device_id)
+        self.assertEqual("My Door", doorbell.device_name)
+        self.assertEqual("houseid", doorbell.house_id)
+        self.assertEqual("abcd", doorbell.serial_number)
+        self.assertEqual("3.1.0-HYDRC75+201909251139", doorbell.firmware_version)
+        self.assertEqual("doorbell_offline", doorbell.status)
+        self.assertEqual(81, doorbell.battery_level)
+        self.assertEqual(False, doorbell.is_online)
+        self.assertEqual(False, doorbell.is_standby)
+        self.assertEqual(dateutil.parser.parse("2019-02-20T23:52:46Z"), doorbell.image_created_at_datetime)
+        self.assertEqual(True, doorbell.has_subscription)
+        self.assertEqual('https://res.cloudinary.com/x.jpg', doorbell.image_url)
+        self.assertEqual('hydra1', doorbell.model)
+
+    @requests_mock.Mocker()
     def test_get_locks(self, mock):
         mock.register_uri("get", API_GET_LOCKS_URL, text=load_fixture("get_locks.json"))
 
