@@ -1,6 +1,7 @@
 import datetime
 
 import dateutil.parser
+import requests
 
 from august.device import Device, DeviceDetail
 
@@ -108,3 +109,6 @@ class DoorbellDetail(DeviceDetail):
     @property
     def has_subscription(self):
         return self._has_subscription
+
+    def get_doorbell_image(self, timeout=10):
+        return requests.get(self._image_url, timeout=timeout).content
