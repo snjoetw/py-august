@@ -3,7 +3,7 @@ from enum import Enum
 import datetime
 import dateutil.parser
 
-from august.bridge import BridgeDetail
+from august.bridge import BridgeDetail, BridgeStatus
 from august.device import Device, DeviceDetail
 from august.keypad import KeypadDetail
 
@@ -84,6 +84,22 @@ class LockDetail(DeviceDetail):
     @property
     def bridge(self):
         return self._bridge
+
+    @property
+    def bridge_is_online(self):
+        if self._bridge is None:
+            return False
+
+        # Old style bridge that does not report current status
+        # This may have been updated but I do not have a Gen2
+        # doorbell to test with yet.
+        if self._bridge.status is None and self._bridge.operative:
+            return True
+
+        if (self._bridge.status is not None and self._bridge.status.current == BridgeStatus.ONLINE):
+            return True
+
+        return False
 
     @property
     def doorsense(self):
