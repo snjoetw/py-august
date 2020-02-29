@@ -151,10 +151,52 @@ class TestApi(unittest.TestCase):
         self.assertEqual(81, doorbell.battery_level)
         self.assertEqual(False, doorbell.is_online)
         self.assertEqual(False, doorbell.is_standby)
-        self.assertEqual(dateutil.parser.parse("2019-02-20T23:52:46Z"), doorbell.image_created_at_datetime)
+        self.assertEqual(
+            dateutil.parser.parse("2019-02-20T23:52:46Z"),
+            doorbell.image_created_at_datetime,
+        )
         self.assertEqual(True, doorbell.has_subscription)
-        self.assertEqual('https://res.cloudinary.com/x.jpg', doorbell.image_url)
-        self.assertEqual('hydra1', doorbell.model)
+        self.assertEqual("https://res.cloudinary.com/x.jpg", doorbell.image_url)
+        self.assertEqual("hydra1", doorbell.model)
+
+    @requests_mock.Mocker()
+    def test_get_doorbell_gen2_full_battery_detail(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_DOORBELL_URL.format(doorbell_id="did"),
+            text=load_fixture("get_doorbell.battery_full.json"),
+        )
+
+        api = Api()
+        doorbell = api.get_doorbell_detail(ACCESS_TOKEN, "did")
+
+        self.assertEqual(100, doorbell.battery_level)
+
+    @requests_mock.Mocker()
+    def test_get_doorbell_gen2_medium_battery_detail(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_DOORBELL_URL.format(doorbell_id="did"),
+            text=load_fixture("get_doorbell.battery_medium.json"),
+        )
+
+        api = Api()
+        doorbell = api.get_doorbell_detail(ACCESS_TOKEN, "did")
+
+        self.assertEqual(75, doorbell.battery_level)
+
+    @requests_mock.Mocker()
+    def test_get_doorbell_gen2_low_battery_detail(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_DOORBELL_URL.format(doorbell_id="did"),
+            text=load_fixture("get_doorbell.battery_low.json"),
+        )
+
+        api = Api()
+        doorbell = api.get_doorbell_detail(ACCESS_TOKEN, "did")
+
+        self.assertEqual(10, doorbell.battery_level)
 
     @requests_mock.Mocker()
     def test_get_locks(self, mock):
@@ -246,6 +288,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(88, lock.battery_level)
         self.assertEqual("AUG-SL02-M02-S02", lock.model)
         self.assertEqual("Medium", lock.keypad.battery_level)
+        self.assertEqual(60, lock.keypad.battery_percentage)
         self.assertEqual("5bc65c24e6ef2a263e1450a8", lock.keypad.device_id)
         self.assertIsInstance(lock.bridge, BridgeDetail)
         self.assertEqual(True, lock.bridge_is_online)

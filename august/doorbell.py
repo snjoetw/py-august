@@ -72,7 +72,21 @@ class DoorbellDetail(DeviceDetail):
 
         self._battery_level = None
         if "telemetry" in data:
-            self._battery_level = data["telemetry"].get("battery_soc", None)
+            telemetry = data["telemetry"]
+            if "battery_soc" in telemetry:
+                self._battery_level = telemetry.get("battery_soc", None)
+            elif telemetry.get("doorbell_low_battery"):
+                self._battery_level = 10
+            elif "battery" in telemetry:
+                battery = telemetry["battery"]
+                if battery >= 4:
+                    self._battery_level = 100
+                elif battery >= 3.75:
+                    self._battery_level = 75
+                elif battery >= 3.50:
+                    self._battery_level = 50
+                else:
+                    self._battery_level = 25
 
     @property
     def status(self):
@@ -112,6 +126,7 @@ class DoorbellDetail(DeviceDetail):
 
     @property
     def battery_level(self):
+        """Return an approximation of the battery percentage."""
         return self._battery_level
 
     @property
