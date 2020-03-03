@@ -133,5 +133,9 @@ class DoorbellDetail(DeviceDetail):
     def has_subscription(self):
         return self._has_subscription
 
+    async def async_get_doorbell_image(self, aiohttp_session, timeout=10):
+        response = await aiohttp_session.request("get", self._image_url, timeout=timeout)
+        return await response.read()
+
     def get_doorbell_image(self, timeout=10):
         return requests.get(self._image_url, timeout=timeout).content
