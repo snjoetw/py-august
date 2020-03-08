@@ -3,6 +3,8 @@ import json
 import logging
 import os
 
+import aiofiles
+from aiohttp import ClientError
 from august.authenticator_common import (
     Authentication,
     AuthenticationState,
@@ -11,24 +13,23 @@ from august.authenticator_common import (
     from_authentication_json,
     to_authentication_json,
 )
-import requests
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class Authenticator(AuthenticatorCommon):
+class AuthenticatorAsync(AuthenticatorCommon):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._setup_authentication()
 
-    def _setup_authentication(self):
+    async def async_setup_authentication(self):
         access_token_cache_file = self._access_token_cache_file
         if access_token_cache_file is not None and os.path.exists(
             access_token_cache_file
         ):
-            with open(access_token_cache_file, "r") as file:
+            async with aiofiles.open(access_token_cache_file, "r") as file:
                 try:
-                    self._authentication = from_authentication_json(json.load(file))
+                    contents = await file.read()
+                    self._authentication = from_authentication_json(json.loads(contents))
 
                     # If token is to expire within 7 days then print a warning.
                     if self._authentication.is_expired():
@@ -64,47 +65,50 @@ class Authenticator(AuthenticatorCommon):
             AuthenticationState.REQUIRES_AUTHENTICATION, install_id=self._install_id
         )
 
-    def authenticate(self):
+    async def async_authenticate(self):
         if self._authentication.state == AuthenticationState.AUTHENTICATED:
             return self._authentication
 
         identifier = self._login_method + ":" + self._username
         install_id = self._authentication.install_id
-        response = self._api.get_session(install_id, identifier, self._password)
+        response = await self._api.async_get_session(
+            install_id, identifier, self._password
+        )
 
+        json_dict = await response.json()
         authentication = self._authentication_from_session_response(
-            install_id, response.headers, response.json()
+            install_id, response.headers, json_dict
         )
 
         if authentication.state == AuthenticationState.AUTHENTICATED:
-            self._cache_authentication(authentication)
+            await self._async_cache_authentication(authentication)
 
         return authentication
 
-    def validate_verification_code(self, verification_code):
+    async def async_validate_verification_code(self, verification_code):
         if not verification_code:
             return ValidationResult.INVALID_VERIFICATION_CODE
 
         try:
-            self._api.validate_verification_code(
+            await self._api.async_validate_verification_code(
                 self._authentication.access_token,
                 self._login_method,
                 self._username,
                 verification_code,
             )
-        except requests.exceptions.RequestException:
+        except ClientError:
             return ValidationResult.INVALID_VERIFICATION_CODE
 
         return ValidationResult.VALIDATED
 
-    def send_verification_code(self):
-        self._api.send_verification_code(
+    async def async_send_verification_code(self):
+        await self._api.async_send_verification_code(
             self._authentication.access_token, self._login_method, self._username
         )
 
         return True
 
-    def refresh_access_token(self, force=False):
+    async def async_refresh_access_token(self, force=False):
         if not self.should_refresh() and not force:
             return self._authentication
 
@@ -112,15 +116,15 @@ class Authenticator(AuthenticatorCommon):
             _LOGGER.warning("Tried to refresh access token when not authenticated")
             return self._authentication
 
-        refreshed_token = self._api.refresh_access_token(
+        refreshed_token = await self._api.async_refresh_access_token(
             self._authentication.access_token
         )
 
         authentication = self._process_refreshed_access_token(refreshed_token)
-        self._cache_authentication(authentication)
+        await self._async_cache_authentication(authentication)
         return authentication
 
-    def _cache_authentication(self, authentication):
+    async def _async_cache_authentication(self, authentication):
         if self._access_token_cache_file is not None:
-            with open(self._access_token_cache_file, "w") as file:
-                file.write(to_authentication_json(authentication))
+            async with aiofiles.open(self._access_token_cache_file, "w") as file:
+                await file.write(to_authentication_json(authentication))

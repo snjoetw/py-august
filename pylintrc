@@ -2,6 +2,7 @@
 reports=no
 
 # Reasons disabled:
+# format - handled by black
 # locally-disabled - it spams too much
 # duplicate-code - unavoidable
 # cyclic-import - doesn't test if both import on load
@@ -13,8 +14,10 @@ reports=no
 # too-many-* - are not enforced for the sake of readability
 # too-few-* - same as too-many-*
 # abstract-method - with intro of async there are always methods missing
-
+# no-self-use - used for common between async and non-async
+#
 disable=
+  format,
   locally-disabled,
   duplicate-code,
   cyclic-import,
@@ -33,7 +36,8 @@ disable=
   too-many-lines,
   too-few-public-methods,
   abstract-method,
-  missing-docstring
+  missing-docstring,
+  no-self-use
 
 [EXCEPTIONS]
 overgeneral-exceptions=Exception
