@@ -167,13 +167,51 @@ class LockOperationActivity(Activity):
         super().__init__(ActivityType.LOCK_OPERATION, data)
 
         calling_user = data.get("callingUser", {})
+
+        info = data.get("info", {})
+        self._operated_remote = info.get("remote", False)
+        self._operated_keypad = info.get("keypad", False)
+        self._operated_autorelock = calling_user.get("UserID") == "automaticrelock"
         self._operated_by = "{} {}".format(
             calling_user.get("FirstName"), calling_user.get("LastName"),
+        )
+
+        image_info = calling_user.get("imageInfo", {})
+        self._operator_image_url = image_info.get("original", {}).get(
+            "secure_url", None
+        )
+        self._operator_thumbnail_url = image_info.get("thumbnail", {}).get(
+            "secure_url", None
         )
 
     @property
     def operated_by(self):
         return self._operated_by
+
+    @property
+    def operated_remote(self):
+        """Operation was remote."""
+        return self._operated_remote
+
+    @property
+    def operated_keypad(self):
+        """Operation used keypad."""
+        return self._operated_keypad
+
+    @property
+    def operated_autorelock(self):
+        """Operation done by automatic relock."""
+        return self._operated_autorelock
+
+    @property
+    def operator_image_url(self):
+        """URL to the image of the lock operator."""
+        return self._operator_image_url
+
+    @property
+    def operator_thumbnail_url(self):
+        """URL to the thumbnail of the lock operator."""
+        return self._operator_thumbnail_url
 
 
 class DoorOperationActivity(Activity):

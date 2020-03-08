@@ -1,0 +1,52 @@
+{
+    "entities": {
+        "device": "deviceid",
+        "callingUser": "callinguser",
+        "otherUser": "deleted",
+        "house": "houseid",
+        "activity": "activityid"
+    },
+    "house": {
+        "houseID": "house",
+        "houseName": "namehouse"
+    },
+    "eventID": "eventid",
+    "dateTime": 1583535312002,
+    "action": "lock",
+    "deviceName": "lockname",
+    "deviceID": "deviceid",
+    "deviceType": "lock",
+    "callingUser": {
+        "UserID": "myuser",
+        "FirstName": "I have a",
+        "LastName": "picture",
+        "imageInfo": {
+            "original": {
+                "width": 400,
+                "height": 400,
+                "format": "jpg",
+                "secure_url": "https://image.url"
+            },
+            "thumbnail": {
+                "width": 128,
+                "height": 128,
+                "format": "jpg",
+                "secure_url": "https://thumbnail.url"
+            }
+        }
+    },
+    "otherUser": {
+        "UserID": "deleted",
+        "FirstName": "Unknown",
+        "LastName": "User",
+        "UserName": "deleteduser",
+        "PhoneNo": "deleted"
+    },
+    "info": {
+        "mechanical": "success",
+        "crypto": "success",
+        "dateTime": "2020-03-06T22:55:12.002Z",
+        "action": "lock",
+        "DateLogActionID": "uni"
+    }
+}
