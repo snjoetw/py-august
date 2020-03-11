@@ -171,7 +171,7 @@ class ApiCommon:
             "method": "post",
             "url": API_VALIDATE_VERIFICATION_CODE_URLS[login_method],
             "access_token": access_token,
-            "json": {"login_method": username, "code": str(verification_code)},
+            "json": {login_method: username, "code": str(verification_code)},
         }
 
     def _build_get_doorbells_request(self, access_token):

@@ -3,12 +3,13 @@ import os
 
 from aiohttp import ClientError, ClientResponse, ClientSession
 from aiohttp.helpers import TimerNoop
-from aioresponses import aioresponses
+from aioresponses import aioresponses, CallbackResult
 import aiounittest
 from asynctest import mock
 import august.activity
 from august.api_async import ApiAsync, _raise_response_exceptions
 from august.api_common import (
+    API_VALIDATE_VERIFICATION_CODE_URLS,
     API_GET_DOORBELL_URL,
     API_GET_DOORBELLS_URL,
     API_GET_HOUSE_ACTIVITIES_URL,
@@ -697,6 +698,24 @@ class TestApiAsync(aiounittest.AsyncTestCase):
         self.assertIsInstance(activities[7], august.activity.DoorOperationActivity)
         self.assertIsInstance(activities[8], august.activity.LockOperationActivity)
         self.assertIsInstance(activities[9], august.activity.LockOperationActivity)
+
+    @aioresponses()
+    async def test_async_validate_verification_code(self, mock):
+        last_args = {}
+
+        def response_callback(url, **kwargs):
+            last_args.update(kwargs)
+            return CallbackResult(status=200, body="{}")
+
+        mock.post(
+            API_VALIDATE_VERIFICATION_CODE_URLS["email"], callback=response_callback
+        )
+
+        api = ApiAsync(ClientSession())
+        await api.async_validate_verification_code(
+            ACCESS_TOKEN, "email", "emailaddress", 123456
+        )
+        assert last_args["json"] == {"code": "123456", "email": "emailaddress"}
 
     def test__raise_response_exceptions(self):
         loop = mock.Mock()
