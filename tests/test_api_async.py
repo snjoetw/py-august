@@ -14,6 +14,7 @@ from august.api_common import (
     API_GET_DOORBELLS_URL,
     API_GET_HOUSE_ACTIVITIES_URL,
     API_GET_LOCK_STATUS_URL,
+    API_GET_HOUSES_URL,
     API_GET_LOCK_URL,
     API_GET_LOCKS_URL,
     API_GET_PINS_URL,
@@ -698,6 +699,19 @@ class TestApiAsync(aiounittest.AsyncTestCase):
         self.assertIsInstance(activities[7], august.activity.DoorOperationActivity)
         self.assertIsInstance(activities[8], august.activity.LockOperationActivity)
         self.assertIsInstance(activities[9], august.activity.LockOperationActivity)
+
+
+    @aioresponses()
+    async def test_async_refresh_access_token(self, mock):
+        mock.get(
+            API_GET_HOUSES_URL,
+            body="{}",
+            headers={"x-august-access-token": "xyz"}
+        )
+
+        api = ApiAsync(ClientSession())
+        new_token = await api.async_refresh_access_token("token")
+        assert new_token == "xyz"
 
     @aioresponses()
     async def test_async_validate_verification_code(self, mock):
