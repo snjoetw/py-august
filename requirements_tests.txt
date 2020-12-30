@@ -1,6 +1,6 @@
 asynctest
 coveralls
-dateutil
+python-dateutil
 flake8
 mock
 pylint

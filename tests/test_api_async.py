@@ -700,7 +700,6 @@ class TestApiAsync(aiounittest.AsyncTestCase):
         self.assertIsInstance(activities[8], august.activity.LockOperationActivity)
         self.assertIsInstance(activities[9], august.activity.LockOperationActivity)
 
-
     @aioresponses()
     async def test_async_refresh_access_token(self, mock):
         mock.get(
