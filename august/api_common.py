@@ -241,7 +241,7 @@ class ApiCommon:
         return {
             "method": "get",
             "url": API_GET_HOUSES_URL,
-            "access_token": "access_token",
+            "access_token": access_token,
         }
 
     def _build_call_lock_operation_request(
