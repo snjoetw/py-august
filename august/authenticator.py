@@ -3,6 +3,7 @@ import json
 import logging
 import os
 
+import requests
 from august.authenticator_common import (
     Authentication,
     AuthenticationState,
@@ -11,7 +12,6 @@ from august.authenticator_common import (
     from_authentication_json,
     to_authentication_json,
 )
-import requests
 
 _LOGGER = logging.getLogger(__name__)
 
