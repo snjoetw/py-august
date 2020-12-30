@@ -1,5 +1,6 @@
 asynctest
 coveralls
+dateutil
 flake8
 mock
 pylint
