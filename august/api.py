@@ -4,6 +4,8 @@ import json
 import logging
 import time
 
+from requests import Session, request
+from requests.exceptions import HTTPError
 from august.api_common import (
     API_LOCK_URL,
     API_RETRY_ATTEMPTS,
@@ -21,8 +23,6 @@ from august.doorbell import DoorbellDetail
 from august.exceptions import AugustApiHTTPError
 from august.lock import LockDetail, determine_door_state, determine_lock_status
 from august.pin import Pin
-from requests import Session, request
-from requests.exceptions import HTTPError
 
 _LOGGER = logging.getLogger(__name__)
 

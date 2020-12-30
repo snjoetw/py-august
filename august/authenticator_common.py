@@ -5,8 +5,8 @@ import json
 import logging
 import uuid
 
-from august.api import HEADER_AUGUST_ACCESS_TOKEN
 import dateutil.parser
+from august.api import HEADER_AUGUST_ACCESS_TOKEN
 
 # The default time before expiration to refresh a token
 DEFAULT_RENEWAL_THRESHOLD = timedelta(days=7)

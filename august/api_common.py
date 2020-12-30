@@ -1,5 +1,6 @@
 """Api functions common between sync and async."""
 
+import dateutil.parser
 from august.activity import (
     ACTIVITY_ACTIONS_DOOR_OPERATION,
     ACTIVITY_ACTIONS_DOORBELL_DING,
@@ -14,7 +15,6 @@ from august.activity import (
 )
 from august.doorbell import Doorbell
 from august.lock import Lock, LockDoorStatus, determine_door_state, door_state_to_string
-import dateutil.parser
 
 API_RETRY_TIME = 2.5
 API_RETRY_ATTEMPTS = 10
