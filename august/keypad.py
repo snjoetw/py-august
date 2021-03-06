@@ -13,6 +13,7 @@ class KeypadDetail(DeviceDetail):
             house_id,
             data["serialNumber"],
             data["currentFirmwareVersion"],
+            None,
         )
 
         self._battery_level = data["batteryLevel"]

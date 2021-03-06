@@ -5,6 +5,8 @@ import requests
 
 from august.device import Device, DeviceDetail
 
+DOORBELL_STATUS_KEY = "status"
+
 
 class Doorbell(Device):
     def __init__(self, device_id, data):
@@ -53,6 +55,7 @@ class DoorbellDetail(DeviceDetail):
             data["HouseID"],
             data["serialNumber"],
             data["firmwareVersion"],
+            data.get("pubsubChannel"),
         )
 
         self._status = data["status"]

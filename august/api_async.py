@@ -71,6 +71,12 @@ class ApiAsync(ApiCommon):
         )
         return True
 
+    async def async_get_user(self, access_token):
+        response = await self._async_dict_to_api(
+            self._build_get_user_request(access_token)
+        )
+        return await response.json()
+
     async def async_get_houses(self, access_token):
         return await self._async_dict_to_api(
             self._build_get_houses_request(access_token)

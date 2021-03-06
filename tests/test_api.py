@@ -19,6 +19,7 @@ from august.api_common import (
     API_GET_LOCK_URL,
     API_GET_LOCKS_URL,
     API_GET_PINS_URL,
+    API_GET_USER_URL,
     API_LOCK_URL,
     API_UNLOCK_URL,
 )
@@ -759,6 +760,18 @@ class TestApi(unittest.TestCase):
                 _raise_response_exceptions(mocked_response)
             except AugustApiHTTPError as err:
                 self.assertEqual(str(err), ERROR_MAP[status_code])
+
+    @requests_mock.Mocker()
+    def test_get_user(self, mock):
+        mock.register_uri(
+            "get",
+            API_GET_USER_URL,
+            text='{"UserID": "abc"}',
+        )
+
+        user_details = Api().get_user(ACCESS_TOKEN)
+
+        self.assertEqual(user_details, {"UserID": "abc"})
 
 
 class MockedResponse(Response):

@@ -7,10 +7,13 @@ from august.bridge import BridgeDetail, BridgeStatus
 from august.device import Device, DeviceDetail
 from august.keypad import KeypadDetail
 
-LOCKED_STATUS = ("locked", "kAugLockState_Locked")
-UNLOCKED_STATUS = ("unlocked", "kAugLockState_Unlocked")
+LOCKED_STATUS = ("locked", "kAugLockState_Locked", "kAugLockState_Locking")
+UNLOCKED_STATUS = ("unlocked", "kAugLockState_Unlocked", "kAugLockState_Unlocking")
 CLOSED_STATUS = ("closed", "kAugLockDoorState_Closed", "kAugDoorState_Closed")
 OPEN_STATUS = ("open", "kAugLockDoorState_Open", "kAugDoorState_Open")
+
+LOCK_STATUS_KEY = "status"
+DOOR_STATE_KEY = "doorState"
 
 
 class Lock(Device):
@@ -40,6 +43,7 @@ class LockDetail(DeviceDetail):
             data["HouseID"],
             data["SerialNumber"],
             data["currentFirmwareVersion"],
+            data.get("pubsubChannel"),
         )
 
         if "Bridge" in data:
@@ -57,8 +61,8 @@ class LockDetail(DeviceDetail):
         if "LockStatus" in data:
             lock_status = data["LockStatus"]
 
-            self._lock_status = determine_lock_status(lock_status.get("status"))
-            self._door_state = determine_door_state(lock_status.get("doorState"))
+            self._lock_status = determine_lock_status(lock_status.get(LOCK_STATUS_KEY))
+            self._door_state = determine_door_state(lock_status.get(DOOR_STATE_KEY))
 
             if "dateTime" in lock_status:
                 self._lock_status_datetime = dateutil.parser.parse(
@@ -66,7 +70,10 @@ class LockDetail(DeviceDetail):
                 )
                 self._door_state_datetime = self._lock_status_datetime
 
-            if "doorState" in lock_status and lock_status["doorState"] != "init":
+            if (
+                DOOR_STATE_KEY in lock_status
+                and self._door_state != LockDoorStatus.UNKNOWN
+            ):
                 self._doorsense = True
 
         if "keypad" in data:
@@ -153,6 +160,8 @@ class LockDetail(DeviceDetail):
         if var not in LockDoorStatus:
             raise ValueError
         self._door_state = var
+        if var != LockDoorStatus.UNKNOWN:
+            self._doorsense = True
 
     @property
     def door_state_datetime(self):
@@ -164,6 +173,12 @@ class LockDetail(DeviceDetail):
         if not isinstance(var, datetime.date):
             raise ValueError
         self._door_state_datetime = var
+
+    def set_online(self, state):
+        """Called when the lock comes back online or goes offline."""
+        if not self._bridge:
+            return
+        self._bridge.set_online(state)
 
 
 class LockStatus(Enum):

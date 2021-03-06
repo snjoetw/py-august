@@ -19,13 +19,20 @@ class Device:
 
 class DeviceDetail:
     def __init__(
-        self, device_id, device_name, house_id, serial_number, firmware_version
+        self,
+        device_id,
+        device_name,
+        house_id,
+        serial_number,
+        firmware_version,
+        pubsub_channel,
     ):
         self._device_id = device_id
         self._device_name = device_name
         self._house_id = house_id
         self._serial_number = serial_number
         self._firmware_version = firmware_version
+        self._pubsub_channel = pubsub_channel
 
     @property
     def device_id(self):
@@ -46,3 +53,7 @@ class DeviceDetail:
     @property
     def firmware_version(self):
         return self._firmware_version
+
+    @property
+    def pubsub_channel(self):
+        return self._pubsub_channel

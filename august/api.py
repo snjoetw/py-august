@@ -73,6 +73,9 @@ class Api(ApiCommon):
         )
         return True
 
+    def get_user(self, access_token):
+        return self._dict_to_api(self._build_get_user_request(access_token)).json()
+
     def get_houses(self, access_token):
         return self._dict_to_api(self._build_get_houses_request(access_token))
 

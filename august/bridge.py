@@ -2,15 +2,21 @@ from enum import Enum
 
 from august.device import DeviceDetail
 
+ONLINE_EVENT = "associated_bridge_online"
+OFFLINE_EVENT = "associated_bridge_offline"
+
 
 class BridgeStatus(Enum):
+    OFFLINE = "offline"
     ONLINE = "online"
     UNKNOWN = "unknown"
 
 
 class BridgeDetail(DeviceDetail):
     def __init__(self, house_id, data):
-        super().__init__(data["_id"], None, house_id, None, data["firmwareVersion"])
+        super().__init__(
+            data["_id"], None, house_id, None, data["firmwareVersion"], None
+        )
 
         self._operative = data["operative"]
 
@@ -27,6 +33,10 @@ class BridgeDetail(DeviceDetail):
     def operative(self):
         return self._operative
 
+    def set_online(self, state):
+        """Called when the bridge online state changes."""
+        self._status.set_online(state)
+
 
 class BridgeStatusDetail:
     def __init__(self, data):
@@ -42,6 +52,10 @@ class BridgeStatusDetail:
     @property
     def current(self):
         return self._current
+
+    def set_online(self, state):
+        """Called when the bridge online state changes."""
+        self._current = BridgeStatus.ONLINE if state else BridgeStatus.OFFLINE
 
     @property
     def updated(self):

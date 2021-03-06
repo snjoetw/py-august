@@ -54,6 +54,7 @@ API_GET_LOCK_STATUS_URL = API_BASE_URL + "/locks/{lock_id}/status"
 API_GET_PINS_URL = API_BASE_URL + "/locks/{lock_id}/pins"
 API_LOCK_URL = API_BASE_URL + "/remoteoperate/{lock_id}/lock"
 API_UNLOCK_URL = API_BASE_URL + "/remoteoperate/{lock_id}/unlock"
+API_GET_USER_URL = API_BASE_URL + "/users/me"
 
 
 def _api_headers(access_token=None):
@@ -216,6 +217,9 @@ class ApiCommon:
 
     def _build_get_locks_request(self, access_token):
         return {"method": "get", "url": API_GET_LOCKS_URL, "access_token": access_token}
+
+    def _build_get_user_request(self, access_token):
+        return {"method": "get", "url": API_GET_USER_URL, "access_token": access_token}
 
     def _build_get_lock_detail_request(self, access_token, lock_id):
         return {

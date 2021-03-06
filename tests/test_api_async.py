@@ -21,6 +21,7 @@ from august.api_common import (
     API_GET_LOCK_URL,
     API_GET_LOCKS_URL,
     API_GET_PINS_URL,
+    API_GET_USER_URL,
     API_LOCK_URL,
     API_UNLOCK_URL,
     API_VALIDATE_VERIFICATION_CODE_URLS,
@@ -779,6 +780,14 @@ class TestApiAsync(aiounittest.AsyncTestCase):
                 _raise_response_exceptions(mocked_response)
             except AugustApiAIOHTTPError as err:
                 self.assertEqual(str(err), ERROR_MAP[status_code])
+
+    @aioresponses()
+    async def test_async_get_usern(self, mock):
+        mock.get(API_GET_USER_URL, body='{"UserID": "abc"}')
+
+        api = ApiAsync(ClientSession())
+        user_details = await api.async_get_user("token")
+        assert user_details == {"UserID": "abc"}
 
 
 class MockedResponse(ClientResponse):
