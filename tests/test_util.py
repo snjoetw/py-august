@@ -1,23 +1,23 @@
+import datetime
 import json
 import os
 import unittest
 
 import dateutil.parser
-import datetime
 
 from august.activity import (
+    DoorbellMotionActivity,
     DoorOperationActivity,
     LockOperationActivity,
-    DoorbellMotionActivity,
-)
-from august.lock import LockDetail, LockDoorStatus, LockStatus
-from august.doorbell import DoorbellDetail
-from august.util import (
-    update_lock_detail_from_activity,
-    as_utc_from_local,
-    update_doorbell_image_from_activity,
 )
 from august.api import _convert_lock_result_to_activities
+from august.doorbell import DoorbellDetail
+from august.lock import LockDetail, LockDoorStatus, LockStatus
+from august.util import (
+    as_utc_from_local,
+    update_doorbell_image_from_activity,
+    update_lock_detail_from_activity,
+)
 
 
 def load_fixture(filename):
@@ -184,7 +184,8 @@ class TestDetail(unittest.TestCase):
         )
         self.assertEqual("K98GiDT45GUL", doorbell.device_id)
         self.assertEqual(
-            None, doorbell.image_created_at_datetime,
+            None,
+            doorbell.image_created_at_datetime,
         )
         self.assertEqual(None, doorbell.image_url)
         doorbell_motion_activity_no_image = DoorbellMotionActivity(

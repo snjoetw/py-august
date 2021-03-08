@@ -5,6 +5,7 @@ import os
 
 import aiofiles
 from aiohttp import ClientError
+
 from august.authenticator_common import (
     Authentication,
     AuthenticationState,
@@ -29,7 +30,9 @@ class AuthenticatorAsync(AuthenticatorCommon):
             async with aiofiles.open(access_token_cache_file, "r") as file:
                 try:
                     contents = await file.read()
-                    self._authentication = from_authentication_json(json.loads(contents))
+                    self._authentication = from_authentication_json(
+                        json.loads(contents)
+                    )
 
                     # If token is to expire within 7 days then print a warning.
                     if self._authentication.is_expired():

@@ -6,6 +6,7 @@ import logging
 import uuid
 
 import dateutil.parser
+
 from august.api import HEADER_AUGUST_ACCESS_TOKEN
 
 # The default time before expiration to refresh a token
@@ -79,7 +80,7 @@ class AuthenticationState(Enum):
     REQUIRES_AUTHENTICATION = "requires_authentication"
     REQUIRES_VALIDATION = "requires_validation"
     AUTHENTICATED = "authenticated"
-    BAD_PASSWORD = "bad_password"
+    BAD_PASSWORD = "bad_password"  # nosec
 
 
 class ValidationResult(Enum):

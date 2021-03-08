@@ -37,9 +37,11 @@ def update_doorbell_image_from_activity(doorbell_detail, activity):
         if activity.image_created_at_datetime is None:
             return False
 
-        if (doorbell_detail.image_created_at_datetime is None
-                or doorbell_detail.image_created_at_datetime
-                < activity.image_created_at_datetime):
+        if (
+            doorbell_detail.image_created_at_datetime is None
+            or doorbell_detail.image_created_at_datetime
+            < activity.image_created_at_datetime
+        ):
             doorbell_detail.image_url = activity.image_url
             doorbell_detail.image_created_at_datetime = (
                 activity.image_created_at_datetime

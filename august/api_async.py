@@ -4,6 +4,7 @@ import asyncio
 import logging
 
 from aiohttp import ClientResponseError
+
 from august.api_common import (
     API_LOCK_URL,
     API_RETRY_ATTEMPTS,

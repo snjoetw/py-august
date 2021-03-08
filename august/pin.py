@@ -93,7 +93,5 @@ class Pin:
 
     def __repr__(self):
         return "Pin(id={} firstName={}, lastName={})".format(
-            self.pin_id,
-            self.first_name,
-            self.last_name
+            self.pin_id, self.first_name, self.last_name
         )

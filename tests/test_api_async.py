@@ -3,30 +3,31 @@ import os
 
 from aiohttp import ClientError, ClientResponse, ClientSession
 from aiohttp.helpers import TimerNoop
-from aioresponses import aioresponses, CallbackResult
+from aioresponses import CallbackResult, aioresponses
 import aiounittest
 from asynctest import mock
+import dateutil.parser
+from dateutil.tz import tzlocal, tzutc
+from yarl import URL
+
 import august.activity
 from august.api_async import ApiAsync, _raise_response_exceptions
 from august.api_common import (
-    API_VALIDATE_VERIFICATION_CODE_URLS,
     API_GET_DOORBELL_URL,
     API_GET_DOORBELLS_URL,
     API_GET_HOUSE_ACTIVITIES_URL,
-    API_GET_LOCK_STATUS_URL,
     API_GET_HOUSES_URL,
+    API_GET_LOCK_STATUS_URL,
     API_GET_LOCK_URL,
     API_GET_LOCKS_URL,
     API_GET_PINS_URL,
     API_LOCK_URL,
     API_UNLOCK_URL,
+    API_VALIDATE_VERIFICATION_CODE_URLS,
 )
 from august.bridge import BridgeDetail, BridgeStatus, BridgeStatusDetail
 from august.exceptions import AugustApiAIOHTTPError
 from august.lock import LockDoorStatus, LockStatus
-import dateutil.parser
-from dateutil.tz import tzlocal, tzutc
-from yarl import URL
 
 ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9"
 
@@ -503,7 +504,8 @@ class TestApiAsync(aiounittest.AsyncTestCase):
     async def test_async_unlock_from_fixture(self, mock):
         lock_id = 1234
         mock.put(
-            API_UNLOCK_URL.format(lock_id=lock_id), body=load_fixture("unlock.json"),
+            API_UNLOCK_URL.format(lock_id=lock_id),
+            body=load_fixture("unlock.json"),
         )
 
         api = ApiAsync(ClientSession())
@@ -542,7 +544,8 @@ class TestApiAsync(aiounittest.AsyncTestCase):
     async def test_async_unlock_return_activities_from_fixture(self, mock):
         lock_id = 1234
         mock.put(
-            API_UNLOCK_URL.format(lock_id=lock_id), body=load_fixture("unlock.json"),
+            API_UNLOCK_URL.format(lock_id=lock_id),
+            body=load_fixture("unlock.json"),
         )
 
         api = ApiAsync(ClientSession())
@@ -703,9 +706,7 @@ class TestApiAsync(aiounittest.AsyncTestCase):
     @aioresponses()
     async def test_async_refresh_access_token(self, mock):
         mock.get(
-            API_GET_HOUSES_URL,
-            body="{}",
-            headers={"x-august-access-token": "xyz"}
+            API_GET_HOUSES_URL, body="{}", headers={"x-august-access-token": "xyz"}
         )
 
         api = ApiAsync(ClientSession())

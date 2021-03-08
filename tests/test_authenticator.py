@@ -2,9 +2,10 @@ from datetime import datetime, timedelta, timezone
 import unittest
 from unittest.mock import Mock, patch
 
-from august.authenticator import AuthenticationState, Authenticator, ValidationResult
 from dateutil.tz import tzutc
 from requests import RequestException
+
+from august.authenticator import AuthenticationState, Authenticator, ValidationResult
 
 
 def format_datetime(dt):

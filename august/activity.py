@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+
 import dateutil.parser
 
 from august.lock import LockDoorStatus, LockStatus
@@ -173,7 +174,8 @@ class LockOperationActivity(Activity):
         self._operated_keypad = info.get("keypad", False)
         self._operated_autorelock = calling_user.get("UserID") == "automaticrelock"
         self._operated_by = "{} {}".format(
-            calling_user.get("FirstName"), calling_user.get("LastName"),
+            calling_user.get("FirstName"),
+            calling_user.get("LastName"),
         )
 
         image_info = calling_user.get("imageInfo", {})

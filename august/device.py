@@ -18,8 +18,9 @@ class Device:
 
 
 class DeviceDetail:
-    def __init__(self, device_id, device_name, house_id, serial_number,
-                 firmware_version):
+    def __init__(
+        self, device_id, device_name, house_id, serial_number, firmware_version
+    ):
         self._device_id = device_id
         self._device_name = device_name
         self._house_id = house_id

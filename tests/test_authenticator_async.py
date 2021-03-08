@@ -4,6 +4,8 @@ import json
 from aiohttp import ClientError, ClientSession
 from aioresponses import aioresponses
 import aiounittest
+from dateutil.tz import tzutc
+
 from august.api_async import ApiAsync
 from august.api_common import (
     API_GET_HOUSES_URL,
@@ -17,7 +19,6 @@ from august.authenticator_async import (
     AuthenticatorAsync,
     ValidationResult,
 )
-from dateutil.tz import tzutc
 
 
 def format_datetime(dt):

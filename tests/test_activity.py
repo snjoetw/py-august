@@ -1,6 +1,6 @@
 import json
-import unittest
 import os
+import unittest
 
 from august.activity import (
     ACTION_DOOR_CLOSED,

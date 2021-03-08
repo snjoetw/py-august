@@ -1,6 +1,7 @@
 """Api functions common between sync and async."""
 
 import dateutil.parser
+
 from august.activity import (
     ACTIVITY_ACTIONS_DOOR_OPERATION,
     ACTIVITY_ACTIONS_DOORBELL_DING,
@@ -20,7 +21,7 @@ API_RETRY_TIME = 2.5
 API_RETRY_ATTEMPTS = 10
 
 HEADER_ACCEPT_VERSION = "Accept-Version"
-HEADER_AUGUST_ACCESS_TOKEN = "x-august-access-token"
+HEADER_AUGUST_ACCESS_TOKEN = "x-august-access-token"  # nosec
 HEADER_AUGUST_API_KEY = "x-august-api-key"
 HEADER_KEASE_API_KEY = "x-kease-api-key"
 HEADER_CONTENT_TYPE = "Content-Type"

@@ -1,6 +1,6 @@
+import datetime
 from enum import Enum
 
-import datetime
 import dateutil.parser
 
 from august.bridge import BridgeDetail, BridgeStatus
@@ -16,7 +16,9 @@ OPEN_STATUS = ("open", "kAugLockDoorState_Open", "kAugDoorState_Open")
 class Lock(Device):
     def __init__(self, device_id, data):
         super().__init__(
-            device_id, data["LockName"], data["HouseID"],
+            device_id,
+            data["LockName"],
+            data["HouseID"],
         )
         self._user_type = data["UserType"]
 
@@ -69,7 +71,9 @@ class LockDetail(DeviceDetail):
 
         if "keypad" in data:
             keypad_name = data["LockName"] + " Keypad"
-            self._keypad_detail = KeypadDetail(self.house_id, keypad_name, data["keypad"])
+            self._keypad_detail = KeypadDetail(
+                self.house_id, keypad_name, data["keypad"]
+            )
         else:
             self._keypad_detail = None
 
@@ -105,7 +109,10 @@ class LockDetail(DeviceDetail):
         if self._bridge.status is None and self._bridge.operative:
             return True
 
-        if (self._bridge.status is not None and self._bridge.status.current == BridgeStatus.ONLINE):
+        if (
+            self._bridge.status is not None
+            and self._bridge.status.current == BridgeStatus.ONLINE
+        ):
             return True
 
         return False

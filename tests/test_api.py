@@ -2,6 +2,13 @@ from datetime import datetime
 import os
 import unittest
 
+import dateutil.parser
+from dateutil.tz import tzlocal, tzutc
+from requests.exceptions import HTTPError
+from requests.models import Response
+from requests.structures import CaseInsensitiveDict
+import requests_mock
+
 import august.activity
 from august.api import Api, _raise_response_exceptions
 from august.api_common import (
@@ -18,12 +25,6 @@ from august.api_common import (
 from august.bridge import BridgeDetail, BridgeStatus, BridgeStatusDetail
 from august.exceptions import AugustApiHTTPError
 from august.lock import LockDoorStatus, LockStatus
-import dateutil.parser
-from dateutil.tz import tzlocal, tzutc
-from requests.exceptions import HTTPError
-from requests.models import Response
-from requests.structures import CaseInsensitiveDict
-import requests_mock
 
 ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9"
 

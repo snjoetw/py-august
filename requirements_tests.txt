@@ -1,5 +1,7 @@
+isort
+black
 asynctest
-coveralls
+bandit
 python-dateutil
 flake8
 mock

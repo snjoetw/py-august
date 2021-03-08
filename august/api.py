@@ -6,6 +6,7 @@ import time
 
 from requests import Session, request
 from requests.exceptions import HTTPError
+
 from august.api_common import (
     API_LOCK_URL,
     API_RETRY_ATTEMPTS,

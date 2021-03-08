@@ -4,6 +4,7 @@ import logging
 import os
 
 import requests
+
 from august.authenticator_common import (
     Authentication,
     AuthenticationState,
