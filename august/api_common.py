@@ -196,7 +196,9 @@ class ApiCommon:
         }
 
     def _build_get_houses_request(self, access_token):
-        return {"method": "get", "access_token": access_token}
+        return {"method": "get",
+                "url": API_GET_HOUSES_URL,
+                "access_token": access_token}
 
     def _build_get_house_request(self, access_token, house_id):
         return {
