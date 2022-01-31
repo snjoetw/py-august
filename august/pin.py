@@ -3,6 +3,7 @@ import dateutil.parser
 
 class Pin:
     def __init__(self, data):
+        self.data = data
         self._pin_id = data["_id"]
         self._lock_id = data["lockID"]
         self._user_id = data["userID"]

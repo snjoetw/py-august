@@ -18,6 +18,7 @@ class Lock(Device):
         super().__init__(
             device_id, data["LockName"], data["HouseID"],
         )
+        self.data = data
         self._user_type = data["UserType"]
 
     @property
@@ -39,6 +40,8 @@ class LockDetail(DeviceDetail):
             data["SerialNumber"],
             data["currentFirmwareVersion"],
         )
+
+        self.data = data
 
         if "Bridge" in data:
             self._bridge = BridgeDetail(self.house_id, data["Bridge"])
@@ -157,6 +160,12 @@ class LockDetail(DeviceDetail):
         if not isinstance(var, datetime.date):
             raise ValueError
         self._door_state_datetime = var
+
+    def __repr__(self):
+        return "Lock(id={}, name={}, house_id={})".format(
+            self.device_id, self.device_name, self.house_id
+        )
+
 
 
 class LockStatus(Enum):
