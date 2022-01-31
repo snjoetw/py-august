@@ -139,6 +139,13 @@ class Api(ApiCommon):
 
         return [Pin(pin_json) for pin_json in json_dict.get("loaded", [])]
 
+    def get_pin(self, access_token, lock_id, pin_id):
+        json_dict = self._dict_to_api(
+            self._build_get_pin_request(access_token, lock_id, pin_id)
+        ).json()
+
+        return [Pin(pin_json) for pin_json in json_dict.get("loaded", [])]
+
     def _call_lock_operation(self, url_str, access_token, lock_id):
         return self._dict_to_api(
             self._build_call_lock_operation_request(
