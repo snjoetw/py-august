@@ -17,9 +17,9 @@ class Pin:
         self._created_at = data["createdAt"]
         self._updated_at = data["updatedAt"]
         self._loaded_date = data["loadedDate"]
-        self._access_start_time = data["accessStartTime"]
-        self._access_end_time = data["accessEndTime"]
-        self._access_times = data["accessTimes"]
+        self._access_start_time = data.get("accessStartTime", None)
+        self._access_end_time = data.get("accessEndTime", None)
+        self._access_times = data.get("accessTimes", None)
 
     @property
     def pin_id(self):
